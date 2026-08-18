@@ -1,1000 +1,348 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="我的小站：游戏 · 小说 · 学习资料的个人收藏与进度管理" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>" />
-<title>我的小站</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的小站 - 个人收藏与记录</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f172a">
 <style>
-  :root{
-    --bg:#0d0f14; --panel:#141821; --panel2:#1b2230; --fg:#eceef2; --muted:#9aa3af;
-    --accent:#5b8cff; --accent2:#36d6c3; --line:#262d3a; --radius:16px; --hot:#ff5a5a;
-  }
-  :root[data-theme="light"]{
-    --bg:#f4f6fa; --panel:#ffffff; --panel2:#eef1f6; --fg:#1a2029; --muted:#5c6672;
-    --line:#dde3ec; --accent:#3b6cf5; --accent2:#0aa893; --hot:#e5484d;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-    background:var(--bg);color:var(--fg);line-height:1.6}
-  a{color:var(--accent);text-decoration:none}
-
-  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-  main>*{animation:fadeUp .35s ease both}
-  .card,.rankrow,.pick,.stat,.srow,.pickrow>*{animation:fadeUp .35s ease both}
-
-  .topbar{position:sticky;top:0;z-index:30;background:rgba(13,15,20,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-  :root[data-theme="light"] .topbar{background:rgba(255,255,255,.92)}
-  .topbar .row1{display:flex;align-items:center;gap:10px;padding:10px 18px;flex-wrap:wrap}
-  .brand{font-weight:800;letter-spacing:.5px;font-size:17px;cursor:pointer}
-  .brand small{color:var(--muted);font-weight:500;margin-left:6px;font-size:12px}
-  .searchbox{background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--fg);
-    padding:7px 12px;font-size:13px;width:200px;outline:none;transition:border-color .15s}
-  .searchbox:focus{border-color:var(--accent)}
-  .nav{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
-  .nav a{padding:7px 13px;border-radius:10px;color:var(--muted);font-size:14px;border:1px solid transparent}
-  .nav a:hover{color:var(--fg)}
-  .nav a.active{background:var(--panel2);color:var(--fg);border-color:var(--line)}
-  .nav a .badge{background:var(--accent);color:#0b0d12;border-radius:999px;font-size:11px;padding:0 6px;margin-left:4px;font-weight:700}
-  .updbtn,.iconbtn{background:var(--panel2);border:1px solid var(--line);color:var(--fg);border-radius:10px;
-    padding:7px 12px;cursor:pointer;font-size:13px}
-  .updbtn:hover,.iconbtn:hover{border-color:var(--accent)}
-  .statusbar{display:flex;align-items:center;gap:14px;padding:4px 18px 8px;color:var(--muted);font-size:12px;flex-wrap:wrap}
-  .statusbar select{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:3px 6px;font-size:12px}
-
-  main{max-width:1180px;margin:0 auto;padding:24px 18px 70px}
-  .crumbs{color:var(--muted);font-size:13px;margin:0 0 14px}
-  .crumbs a{color:var(--muted)}
-  h1.page{font-size:26px;margin:0 0 4px}
-  .page-sub{color:var(--muted);margin:0 0 18px;font-size:14px}
-
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-  .chip{padding:6px 13px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--muted);cursor:pointer;font-size:13px}
-  .chip.on{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#0b0d12;border:none;font-weight:700}
-
-  /* 通用封面 */
-  .cover{position:relative;overflow:hidden;border-radius:14px 14px 0 0;aspect-ratio:3/4;
-    display:flex;align-items:center;justify-content:center}
-  .cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .cover .emoji{font-size:46px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));z-index:1}
-  .cover .cv-name{position:absolute;left:10px;right:10px;bottom:10px;font-size:15px;font-weight:700;z-index:2;
-    text-shadow:0 2px 8px rgba(0,0,0,.85);line-height:1.25}
-  .cover .badge-top{position:absolute;top:8px;left:8px;z-index:3;background:rgba(0,0,0,.6);border:1px solid var(--line);
-    color:#fff;font-size:11px;padding:2px 8px;border-radius:8px}
-  .cover .fresh{position:absolute;top:8px;right:8px;z-index:3;background:linear-gradient(90deg,#ff7a45,#ff5a5a);
-    color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:8px}
-
-  /* 状态徽章 */
-  .stbadge{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;font-weight:700;vertical-align:middle}
-  .st-playing{background:rgba(54,214,195,.15);color:var(--accent2);border:1px solid var(--accent2)}
-  .st-wish{background:rgba(91,140,255,.15);color:var(--accent);border:1px solid var(--accent)}
-  .st-done{background:rgba(255,210,61,.15);color:#ffd23d;border:1px solid #ffd23d}
-  .st-drop{background:rgba(154,163,175,.15);color:var(--muted);border:1px solid var(--line)}
-  .st-reading{background:rgba(54,214,195,.15);color:var(--accent2);border:1px solid var(--accent2)}
-  .st-learning{background:rgba(54,214,195,.15);color:var(--accent2);border:1px solid var(--accent2)}
-  .st-finished{background:rgba(255,210,61,.15);color:#ffd23d;border:1px solid #ffd23d}
-  .stars{display:inline-flex;gap:2px;vertical-align:middle}
-  .star{cursor:pointer;color:var(--line);font-size:20px;line-height:1;transition:transform .1s}
-  .star:hover{transform:scale(1.2)}
-  .star.on{color:#ffd23d}
-
-  /* 游戏卡片网格（IGN/游民风格） */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;
-    transition:transform .12s,border-color .12s;display:flex;flex-direction:column}
-  .card:hover{transform:translateY(-4px);border-color:var(--accent)}
-  .card .meta{padding:10px 12px 12px}
-  .card .meta .nm{font-weight:700;font-size:15px}
-  .card .meta .ct{color:var(--accent2);font-size:12px;margin-top:2px}
-  .card .meta .stline{margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-
-  /* 游戏焦点大图 */
-  .hero{position:relative;border-radius:18px;overflow:hidden;margin-bottom:26px;min-height:240px;
-    display:flex;align-items:flex-end;background:#000}
-  .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55}
-  .hero .hgrad{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.85),rgba(0,0,0,.1))}
-  .hero .hcontent{position:relative;z-index:2;padding:26px}
-  .hero .hcontent .ht{font-size:30px;font-weight:800;margin:0}
-  .hero .hcontent .hm{color:#dfe3ea;margin:6px 0 12px;font-size:14px}
-  :root[data-theme="light"] .hero .hcontent .hm{color:#e8ecf2}
-  .hero .hcontent .htags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-  .hero .hcontent .htags span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);
-    padding:3px 10px;border-radius:999px;font-size:12px}
-
-  /* 小说榜单（起点风格） */
-  .ranklist{display:flex;flex-direction:column;gap:12px}
-  .rankrow{display:flex;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    padding:12px;cursor:pointer;transition:.12s}
-  .rankrow:hover{border-color:var(--accent);transform:translateX(2px)}
-  .rankrow .rk{font-size:22px;font-weight:800;color:var(--muted);width:34px;text-align:center;flex:0 0 34px;
-    align-self:center}
-  .rankrow:nth-child(1) .rk{color:#ff5a5a}
-  .rankrow:nth-child(2) .rk{color:#ff9a3d}
-  .rankrow:nth-child(3) .rk{color:#ffd23d}
-  .bcover{position:relative;width:84px;height:112px;flex:0 0 84px;border-radius:8px;overflow:hidden;
-    display:flex;align-items:center;justify-content:center;background:#222}
-  .bcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .bcover .emoji{font-size:30px;z-index:1}
-  .bcover .cv-name{position:absolute;left:6px;right:6px;bottom:6px;font-size:13px;font-weight:700;z-index:2;
-    text-shadow:0 2px 6px #000;line-height:1.2}
-  .binfo{flex:1;min-width:0}
-  .binfo .bt{font-size:17px;font-weight:700}
-  .binfo .bm{color:var(--muted);font-size:13px;margin:2px 0 6px}
-  .binfo .bd{color:#c7cdd6;font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  :root[data-theme="light"] .binfo .bd{color:#3a4450}
-  .binfo .btags{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .htag{font-size:12px;color:var(--hot)}
-  .statag{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--accent2)}
-
-  /* 详情 */
-  .detail{display:grid;grid-template-columns:320px 1fr;gap:28px}
-  @media(max-width:780px){.detail{grid-template-columns:1fr}.detail .dcover{position:relative!important;top:0!important}}
-  .detail .dcover{border-radius:16px;overflow:hidden;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;
-    position:sticky;top:120px;background:#000}
-  .detail .dcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .detail .dcover .emoji{font-size:60px;z-index:1}
-  .detail .dcover .cv-name{position:absolute;left:14px;right:14px;bottom:14px;font-size:22px;font-weight:800;z-index:2;text-shadow:0 2px 8px #000}
-  .detail h1{margin:0 0 6px;font-size:28px}
-  .detail .tags{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
-  .tag{font-size:12px;padding:3px 10px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--accent2)}
-  .detail .desc{color:#cdd3db;font-size:15px;white-space:pre-wrap}
-  :root[data-theme="light"] .detail .desc{color:#333b46}
-  .block{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:18px}
-  .block h3{margin:0 0 10px;font-size:15px;color:var(--muted);font-weight:700;letter-spacing:.5px}
-  .block textarea,.block input,.stsel{width:100%;background:var(--bg);color:var(--fg);border:1px solid var(--line);
-    border-radius:10px;padding:9px;font-family:inherit;font-size:14px}
-  .stsel{width:auto;min-width:160px}
-  .block textarea{min-height:70px;resize:vertical}
-  .block textarea:focus,.block input:focus,.stsel:focus{border-color:var(--accent);outline:none}
-  .time-row{display:flex;gap:12px;flex-wrap:wrap}
-  .time-row label{flex:1;min-width:130px;font-size:13px;color:var(--muted)}
-  .time-row input{margin-top:6px}
-  .state-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-  .state-row>span{font-size:13px;color:var(--muted)}
-  .btn{display:inline-block;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#0b0d12;
-    font-weight:700;padding:9px 16px;border-radius:10px;font-size:14px;border:none;cursor:pointer}
-  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)}
-  .btn.ghost:hover{border-color:var(--accent)}
-  .btn.small{padding:6px 12px;font-size:13px}
-  .row-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-  .rel{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-  .rel .mini{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer}
-  .rel .mini:hover{border-color:var(--accent)}
-
-  /* 首页仪表盘 */
-  .greet{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
-  .greet h1{font-size:28px;margin:0}
-  .greet .date{color:var(--muted);font-size:14px}
-  .sec{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:18px}
-  .sec h3{margin:0 0 14px;font-size:15px;color:var(--muted);display:flex;align-items:center;gap:8px}
-  .sec h3 .more{margin-left:auto;font-size:12px;font-weight:500;color:var(--accent);cursor:pointer}
-  .pickrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-  .pick{display:flex;gap:12px;align-items:center;background:var(--panel2);border:1px solid var(--line);
-    border-radius:12px;padding:10px;cursor:pointer;transition:.12s}
-  .pick:hover{border-color:var(--accent);transform:translateY(-2px)}
-  .pick .pcover{width:52px;height:70px;flex:0 0 52px;border-radius:8px;overflow:hidden;display:flex;
-    align-items:center;justify-content:center;background:#222;position:relative}
-  .pick .pcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .pick .pcover .emoji{font-size:22px;z-index:1}
-  .pick .pt{font-size:14px;font-weight:700}
-  .pick .pm{color:var(--muted);font-size:12px;margin-top:2px}
-  .rankline{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);cursor:pointer}
-  .rankline:last-child{border-bottom:none}
-  .rankline:hover .rn{color:var(--accent)}
-  .rankline .ri{width:22px;text-align:center;font-weight:800;color:var(--muted);font-size:15px}
-  .rankline[data-i="0"] .ri{color:var(--hot)}
-  .rankline[data-i="1"] .ri{color:#ff9a3d}
-  .rankline[data-i="2"] .ri{color:#ffd23d}
-  .rankline .rn{font-weight:600;font-size:14px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .rankline .rm{color:var(--muted);font-size:12px}
-  .feedline{display:flex;gap:8px;flex-wrap:wrap}
-  .feedline a{padding:5px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;font-size:13px;color:var(--fg)}
-  .feedline a:hover{border-color:var(--accent)}
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  @media(max-width:860px){.cols{grid-template-columns:1fr}}
-
-  .mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:10px}
-  .modcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;cursor:pointer;transition:.12s}
-  .modcard:hover{border-color:var(--accent);transform:translateY(-3px)}
-  .modcard .ico{font-size:34px}
-  .modcard h3{margin:10px 0 4px;font-size:19px}
-  .modcard p{color:var(--muted);font-size:13px;margin:0}
-  .stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
-  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px;flex:1;min-width:110px}
-  .stat b{font-size:22px;display:block}
-  .stat span{color:var(--muted);font-size:12px}
-  .newfeed{background:linear-gradient(90deg,rgba(91,140,255,.12),rgba(54,214,195,.12));border:1px solid var(--line);
-    border-radius:14px;padding:14px 16px;margin-bottom:18px;font-size:14px}
-  .newfeed b{color:var(--accent2)}
-
-  /* 搜索 */
-  .searchgrp{margin-top:22px}
-  .searchgrp h3{font-size:14px;color:var(--muted);margin:0 0 10px}
-  .srow{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);
-    border-radius:12px;padding:10px 14px;cursor:pointer;margin-top:8px;transition:.12s}
-  .srow:hover{border-color:var(--accent)}
-  .srow .scover{width:40px;height:54px;flex:0 0 40px;border-radius:6px;overflow:hidden;display:flex;align-items:center;
-    justify-content:center;background:#222;position:relative}
-  .srow .scover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .srow .scover .emoji{font-size:18px;z-index:1}
-  .srow .sname{font-weight:700;font-size:14px}
-  .srow .smeta{color:var(--muted);font-size:12px;margin-left:auto}
-
-  footer{text-align:center;color:var(--muted);padding:30px 20px;border-top:1px solid var(--line);font-size:13px}
-  .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(10px);background:var(--panel2);
-    border:1px solid var(--accent);color:var(--fg);padding:10px 18px;border-radius:12px;font-size:14px;
-    opacity:0;transition:opacity .25s,transform .25s;z-index:50;pointer-events:none;max-width:90vw}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  .empty{color:var(--muted);text-align:center;padding:40px;border:1px dashed var(--line);border-radius:14px}
+:root{--bg:#0b1220;--card:#0f172a;--text:#e6eef8;--muted:#94a3b8;--accent:#60a5fa;--accent2:#8b5cf6;--success:#34d399;--warn:#fbbf24;--danger:#f87171;--border:#1e293b;--shadow:0 10px 30px rgba(0,0,0,.35)}
+[data-theme=light]{--bg:#f8fafc;--card:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--shadow:0 10px 30px rgba(0,0,0,.08)}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+a{color:var(--accent);text-decoration:none}
+.topbar{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,rgba(15,23,42,.95),rgba(15,23,42,.75));backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.container{max-width:1200px;margin:0 auto;padding:0 16px}
+.nav{display:flex;align-items:center;gap:12px;padding:12px 0;flex-wrap:wrap}
+.brand{font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px}
+.brand .logo{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:14px}
+.grow{flex:1}
+.nav a{opacity:.9;padding:6px 10px;border-radius:6px}
+.nav a:hover{background:rgba(255,255,255,.06)}
+.nav a.active{background:rgba(96,165,250,.15);color:var(--accent)}
+.search{position:relative;min-width:220px;flex:1;max-width:420px}
+.search input{width:100%;padding:10px 12px 10px 36px;border-radius:8px;border:1px solid var(--border);background:#0b1220;color:var(--text)}
+.search::before{content:"";position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;background:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%2394a3b8%22><path d=%22M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5 14C7.57 14 6 12.43 6 10.5S7.57 7 9.5 7 13 8.57 13 10.5 11.43 14 9.5 14z%22/></svg>') no-repeat center;background-size:contain}
+.actions{display:flex;gap:8px;align-items:center}
+.btn{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0b1220}
+.statusbar{background:var(--card);border-bottom:1px solid var(--border);padding:8px 0;font-size:12px;color:var(--muted)}
+.statusbar .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(96,165,250,.12);color:var(--accent);font-size:12px}
+.badge.success{background:rgba(52,211,153,.12);color:var(--success)}
+.badge.warn{background:rgba(251,191,36,.12);color:var(--warn)}
+main{padding:16px 0 40px}
+.section-title{font-size:20px;font-weight:700;margin:8px 0 12px;display:flex;align-items:center;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);transition:transform .15s ease,border-color .15s}
+.card:hover{transform:translateY(-2px);border-color:var(--accent)}
+.cover{height:140px;background:linear-gradient(135deg,#334155,#1e293b);position:relative}
+.cover img{width:100%;height:100%;object-fit:cover}
+.cover .emoji{position:absolute;right:8px;bottom:8px;font-size:22px;opacity:.9}
+.content{padding:12px}
+.content .title{font-weight:700;margin:0 0 6px}
+.content .meta{color:var(--muted);font-size:13px;margin:4px 0}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(148,163,184,.12);color:var(--muted)}
+.tag.accent{background:rgba(96,165,250,.15);color:var(--accent)}
+.hero{background:linear-gradient(135deg,#0f172a,#1e293b);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px}
+.hero h1{margin:0 0 8px;font-size:28px}
+.hero p{margin:0;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:16px 0}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.stat .num{font-size:28px;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat .label{color:var(--muted);font-size:13px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.chip{cursor:pointer;padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:13px}
+.chip:hover{border-color:var(--accent)}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#0b1220}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.toast{position:fixed;right:16px;bottom:16px;padding:12px 16px;border-radius:10px;background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);z-index:100;transform:translateY(120%);transition:transform .3s ease}
+.toast.show{transform:translateY(0)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center;z-index:60;padding:16px}
+.modal.active{display:grid}
+.modal>div{background:var(--card);border:1px solid var(--border);border-radius:12px;max-width:560px;width:100%;padding:16px}
+.modal h3{margin:0 0 12px}
+.modal .row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.form label{display:block;margin:8px 0 4px;font-size:13px;color:var(--muted)}
+.form input,.form textarea,.form select{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:#0b1220;color:var(--text)}
+.detail-hero{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--border);margin-bottom:16px}
+.detail-hero .bg{height:220px;background:linear-gradient(135deg,#334155,#1e293b);position:relative}
+.detail-hero .bg img{width:100%;height:100%;object-fit:cover}
+.detail-hero .info{position:absolute;bottom:0;left:0;right:0;padding:16px;background:linear-gradient(0deg,rgba(0,0,0,.7),transparent)}
+.detail-hero .title{font-size:24px;font-weight:700;margin:0}
+.detail-hero .meta{margin-top:6px;color:#cbd5e1}
+.detail-body{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px}
+.detail-body h3{margin:16px 0 8px;font-size:16px}
+.detail-body p{color:var(--muted)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.shelf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.shelf-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;gap:12px;align-items:center}
+.shelf-item .thumb{width:64px;height:64px;border-radius:8px;background:linear-gradient(135deg,#334155,#1e293b);flex-shrink:0}
+.shelf-item .thumb img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+.shelf-item .info{min-width:0}
+.shelf-item .name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shelf-item .sub{color:var(--muted);font-size:12px}
+.stars{color:var(--warn)}
+.commentbox{background:rgba(148,163,184,.08);border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:12px}
+.commentbox textarea{width:100%;min-height:80px;background:transparent;border:0;color:var(--text);resize:vertical}
+.commentbox .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.diy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.diy-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}
+.diy-card .title{font-weight:700;margin-bottom:6px}
+.diy-card .url{font-size:12px;color:var(--muted);word-break:break-all}
+.diy-card .actions{margin-top:8px;display:flex;gap:8px}
+kbd{background:var(--border);padding:2px 6px;border-radius:4px;font-size:12px;font-family:monospace}
+.footer{text-align:center;padding:24px;color:var(--muted);font-size:13px;border-top:1px solid var(--border);margin-top:24px}
+@media (max-width:640px){.nav{gap:8px}.search{min-width:180px}.grid{grid-template-columns:1fr}.hero h1{font-size:22px}}
 </style>
 </head>
 <body>
-
 <div class="topbar">
-  <div class="row1">
-    <span class="brand" onclick="location.hash='#/'">我的小站<small id="year"></small></span>
-    <input class="searchbox" id="searchInput" placeholder="🔍 搜索游戏 / 小说 / 资料…">
-    <nav class="nav" id="nav">
-      <a href="#/games">🎮 游戏</a>
-      <a href="#/novels">📖 小说</a>
-      <a href="#/study">📚 学习资料</a>
-      <a href="#/shelf">📑 书架<span class="badge" id="shelfBadge">0</span></a>
-      <a href="#/diy">🧩 DIY</a>
-    </nav>
-    <button class="updbtn" data-act="update">🔄 更新</button>
-    <button class="iconbtn" id="themeBtn" title="切换主题">☀️</button>
-    <button class="iconbtn" data-act="export" title="导出数据备份">⬇️</button>
-    <button class="iconbtn" data-act="import" title="导入备份">⬆️</button>
-  </div>
-  <div class="statusbar">
-    <span id="lastupdate">最后更新：—</span>
-    <span>自动更新：
-      <select id="automin">
-        <option value="0">关闭</option>
-        <option value="15">每15分钟</option>
-        <option value="30" selected>每30分钟</option>
-        <option value="60">每1小时</option>
-        <option value="1440">每天</option>
-      </select>
-    </span>
-    <span>数据存于本机浏览器，建议定期 ⬇️ 导出备份</span>
+  <div class="container">
+    <div class="nav">
+      <a class="brand" href="#/home"><div class="logo">Q</div>我的小站</a>
+      <div class="grow"></div>
+      <a href="#/home" data-nav="home">首页</a>
+      <a href="#/games" data-nav="games">游戏</a>
+      <a href="#/novels" data-nav="novels">小说</a>
+      <a href="#/study" data-nav="study">学习</a>
+      <a href="#/movies" data-nav="movies">影音</a>
+      <a href="#/shelf" data-nav="shelf">书架</a>
+      <a href="#/stats" data-nav="stats">统计</a>
+      <a href="#/diy" data-nav="diy">DIY</a>
+    </div>
+    <div class="search"><input id="q" placeholder="搜索..." autocomplete="off"></div>
   </div>
 </div>
-
-<main id="app"></main>
-<footer>© <span id="year2"></span> 我的小站 · 由 QClaw 生成 · 游戏封面来自 Steam 官方 CDN（部署后可每日同步上新）</footer>
+<div class="statusbar">
+  <div class="container">
+    <div class="row">
+      <span class="badge" id="stat-games">游戏 0</span>
+      <span class="badge" id="stat-novels">小说 0</span>
+      <span class="badge" id="stat-study">学习 0</span>
+      <span class="badge" id="stat-movies">影音 0</span>
+      <span class="badge success" id="stat-shelf">书架 0</span>
+      <div class="grow"></div>
+      <button class="btn" id="themeBtn" title="切换主题">主题</button>
+      <button class="btn" id="exportBtn">导出</button>
+      <button class="btn" id="importBtn">导入</button>
+      <button class="btn primary" id="updateBtn">更新</button>
+    </div>
+  </div>
+</div>
+<main><div class="container" id="app"></div></main>
+<div class="footer">
+  <div>&copy; 2026 我的小站 - 由 QClaw 生成 - 游戏封面来自 Steam 官方 CDN - 支持安装为应用 (PWA)</div>
+</div>
 <div class="toast" id="toast"></div>
-<input type="file" id="importFile" accept="application/json,.json" hidden>
-<input type="file" id="coverFile" accept="image/*" hidden>
-
+<div class="modal" id="modal">
+  <div>
+    <h3 id="mt">提示</h3>
+    <p id="mc">内容</p>
+    <div class="row"><button class="btn" id="mok">确定</button></div>
+  </div>
+</div>
+<input type="file" id="fileInput" accept=".json" style="display:none">
 <script>
-const $=s=>document.querySelector(s);
-const app=$('#app');
-const MODS={games:{name:'游戏',icon:'🎮'},novels:{name:'小说',icon:'📖'},study:{name:'学习资料',icon:'📚'},diy:{name:'DIY',icon:'🧩'}};
-const STEAM=id=>`https://cdn.cloudflare.steamstatic.com/steam/apps/${id}/library_600x900.jpg`;
-
-/* ============ 数据（整理至 2026-08；fresh=当年新作/热门） ============ */
 const DATA={
- games:[
-  {id:'genshin',url:'https://ys.mihoyo.com',name:'原神',cat:'开放世界',year:'2020',platform:'PC/PS/移动',dev:'米哈游',img:null,fresh:false,
-   desc:'米哈游出品的开放世界冒险 RPG。提瓦特大陆自由探索，元素反应战斗与角色收集，版本持续更新、地图不断扩张。'},
-  {id:'zzz',url:'https://zzz.mihoyo.com',name:'绝区零',cat:'二次元',year:'2024',platform:'PC/PS/移动',dev:'米哈游',img:null,fresh:false,
-   desc:'米哈游都市潮酷动作 RPG，爽快打击感与潮酷美术，与异环同厂新作。'},
-  {id:'hsr',url:'https://sr.mihoyo.com',name:'崩坏：星穹铁道',cat:'二次元',year:'2023',platform:'PC/移动',dev:'米哈游',img:null,fresh:false,
-   desc:'米哈游银河冒险策略 RPG，回合制战斗 + 沉浸式剧情演出。'},
-  {id:'wzry',url:'https://pvp.qq.com',name:'王者荣耀',cat:'MOBA',year:'2015',platform:'iOS/安卓',dev:'腾讯天美',img:null,fresh:false,
-   desc:'腾讯天美国民级 5v5 手游 MOBA，快节奏对战、英雄多样、社交属性强。'},
-  {id:'lol',url:'https://lol.qq.com',name:'英雄联盟',cat:'MOBA',year:'2009',platform:'PC',dev:'腾讯 Riot',img:null,fresh:false,
-   desc:'Riot/腾讯经典 PC 端 MOBA，全球最成熟的电竞赛事生态之一。'},
-  {id:'dota2',url:'https://www.dota2.com',name:'DOTA2',cat:'MOBA',year:'2013',platform:'PC',dev:'Valve',img:STEAM(570),fresh:false,
-   desc:'Valve 出品的高端 MOBA，深度策略与 TI 国际邀请赛。'},
-  {id:'naraka',url:'https://www.naraka.game',name:'永劫无间',cat:'武侠',year:'2021',platform:'PC/主机',dev:'24 Entertainment',img:STEAM(1203220),fresh:false,
-   desc:'国产武侠 60 人竞技，飞索博弈 + 近战拼刀，IP 影响力大。'},
-  {id:'pubg',url:'https://pubg.com',name:'绝地求生 PUBG',cat:'射击',year:'2017',platform:'PC/主机/手游',dev:'Krafton',img:STEAM(578080),fresh:false,
-   desc:'战术竞技射击开创者，百人吃鸡、拟真枪械。'},
-  {id:'valorant',url:'https://playvalorant.com',name:'无畏契约 VALORANT',cat:'射击',year:'2020',platform:'PC',dev:'Riot',img:null,fresh:false,
-   desc:'Riot 英雄技能 + 精准射击的 5v5 战术 FPS，电竞新势力。'},
-  {id:'mc',url:'https://www.minecraft.net/zh-hans',name:'我的世界',cat:'沙盒',year:'2011',platform:'全平台',dev:'Mojang',img:STEAM(241750),fresh:false,
-   desc:'Mojang 像素沙盒建造生存，红石电路与模组生态无限。'},
-  {id:'eldenring',url:'https://eldenring.bandainamcoent.eu',name:'艾尔登法环',cat:'魂系',year:'2022',platform:'PC/主机',dev:'万代/FromSoftware',img:STEAM(1245620),fresh:false,
-   desc:'FromSoftware/万代开放世界魂系动作 RPG，高难度探索与 boss 战。'},
-  {id:'wukong',url:'https://www.blackmythwukong.com',name:'黑神话：悟空',cat:'动作',year:'2024',platform:'PC/主机',dev:'游戏科学',img:STEAM(2358720),fresh:false,
-   desc:'游戏科学 2024 国产 3A 动作游戏，西游记题材写实美术与硬核战斗。'},
-  {id:'totk',url:'https://www.zelda.com/tears-of-the-kingdom/',name:'塞尔达传说：王国之泪',cat:'开放世界',year:'2023',platform:'Switch',dev:'任天堂',img:null,fresh:false,
-   desc:'任天堂海拉鲁开放世界冒险，"究极手"等能力带来自由建造与解谜。'},
-  {id:'nioh3',url:'https://www.gamecity.ne.jp/nioh3',name:'仁王3',cat:'动作',year:'2026',platform:'PC/PS5',dev:'光荣特库摩',img:STEAM(3681010),fresh:true,
-   desc:'光荣特库摩 2026-02-06 发售的黑暗战国动作 RPG，可切换"武士/忍者"双形态，开放地图。首个 DLC《庆安地狱变》2026-08-19 上线。'},
-  {id:'szerol',url:'https://www.s-games.com.cn/',name:'影之刃零',cat:'动作',year:'2026',platform:'PC/PS5',dev:'灵游坊',img:null,fresh:true,
-   desc:'灵游坊 UE5 暗黑武侠动作，Steam 愿望单 2026 热度前列，2026 年 9 月发售。'},
-  {id:'gta6',url:'https://www.rockstargames.com/VI',name:'GTA 6',cat:'开放世界',year:'2026',platform:'PC/主机',dev:'Rockstar',img:null,fresh:true,
-   desc:'Rockstar 开放世界史诗续作，2026 年底备受瞩目的发售大作。'},
-  {id:'wow',url:'https://worldofwarcraft.blizzard.com',name:'魔兽世界',cat:'MMO',year:'2004',platform:'PC',dev:'暴雪',img:null,fresh:false,
-   desc:'暴雪经典 MMORPG，20 年长线运营的网游常青树。'},
-  {id:'nh',url:'https://n.163.com',name:'逆水寒',cat:'MMO',year:'2018',platform:'PC/手游',dev:'网易',img:null,fresh:false,
-   desc:'网易国风开放世界 3D 武侠 MMO，画面细腻、玩法丰富。'},
-  {id:'ymzx',url:'https://ymzx.qq.com',name:'元梦之星',cat:'派对',year:'2023',platform:'iOS/安卓',dev:'腾讯',img:null,fresh:false,
-   desc:'腾讯正版合家欢派对手游，乐园建造 + 多人小游戏。'},
-  {id:'lovesky',url:'https://lovestory.infoldgames.com',name:'恋与深空',cat:'乙女',year:'2024',platform:'iOS/安卓',dev:'叠纸',img:null,fresh:true,
-   desc:'叠纸 2024 女性向 3D 恋爱冒险，2026 热度持续走高。'}
- ],
- novels:[
-  {id:'xuanjian',name:'玄鉴仙族',cat:'仙侠',author:'季越人',year:'2026',status:'连载',hot:'🔥 起点销冠',fresh:true,
-   desc:'2026 起点销冠。陆江仙残魂附铜镜，落修仙世界，被小家族拾得传仙法，家族修仙种田群像，无系统不圣母。'},
-  {id:'qingshan',name:'青山',cat:'玄幻',author:'会说话的肘子',year:'2026',status:'连载',hot:'🔥 高人气',fresh:true,
-   desc:'肘子新作。当今名利已斩天下九分侠气，诸位，这是天下最后一分侠气的故事。'},
-  {id:'laoshi',name:'捞尸人',cat:'都市',author:'纯洁滴小龙',year:'2026',status:'连载',hot:'🔥 月票榜首',fresh:true,
-   desc:'2026 人气榜前列。人知鬼恐怖，鬼晓人心毒，一本传统灵异小说。'},
-  {id:'yewujiang',name:'夜无疆',cat:'玄幻',author:'辰东',year:'2026',status:'连载',hot:'🔥 月票 Top5',fresh:true,
-   desc:'辰东新作。那一天太阳落下再也没有升起……东方玄幻，世界观宏大。'},
-  {id:'meiqian',name:'没钱修什么仙？',cat:'仙侠',author:'熊狼狗',year:'2026',status:'连载',hot:'🔥 热门',fresh:true,
-   desc:'少年被强者反复侮辱，神秘老者传功，现代设备混入修仙的轻松爽文。'},
-  {id:'guimi',name:'诡秘之主',cat:'玄幻',author:'爱潜水的乌贼',year:'2020',status:'完本',hot:'🌟 神作',fresh:false,
-   desc:'克苏鲁风蒸汽朋克，序列途径升级 + 悬疑叙事，男频神作（已完本，动画热播）。'},
-  {id:'xinghe',name:'星河之主',cat:'科幻',author:'--',year:'2026',status:'连载',hot:'🔥 科幻前列',fresh:true,
-   desc:'2026 起点科幻人气前列，星际文明题材。'},
-  {id:'yishentong',name:'以神通之名',cat:'仙侠',author:'--',year:'2026',status:'连载',hot:'🔥 热门',fresh:true,
-   desc:'2026 仙侠高人气作品。'},
-  {id:'yibaisi',name:'1984：从破产川菜馆开始',cat:'都市',author:'--',year:'2026',status:'连载',hot:'🔥 创业热',fresh:true,
-   desc:'2026 都市创业题材热作。'},
-  {id:'qiangshen',name:'我，枪神！',cat:'游戏',author:'--',year:'2026',status:'连载',hot:'🔥 电竞',fresh:true,
-   desc:'2026 游戏竞技题材热门。'},
-  {id:'xianmen',name:'让仙门再次伟大',cat:'仙侠',author:'--',year:'2026',status:'连载',hot:'🔥 热门',fresh:true,
-   desc:'2026 仙侠热门新作。'},
-  {id:'wudao',name:'苟在武道世界成圣',cat:'武道',author:'--',year:'2026',status:'连载',hot:'🔥 种田流',fresh:true,
-   desc:'2026 武道种田流热门。'},
-  {id:'jianzhu',name:'剑烛大荒',cat:'玄幻',author:'--',year:'2026',status:'连载',hot:'🔥 月票在榜',fresh:true,
-   desc:'2026 玄幻人气前列。'},
-  {id:'yongye',name:'我在永夜打造庇护所',cat:'末世',author:'--',year:'2026',status:'连载',hot:'🔥 末世热',fresh:true,
-   desc:'2026 末世建造生存热门。'},
-  {id:'lunhui',name:'轮回乐园',cat:'轻小说',author:'那一只蚊子',year:'2018',status:'连载',hot:'🌟 老牌',fresh:false,
-   desc:'轻小说衍生同人，苏晓签轮回契约穿行诸界执行任务，暗黑爽文长篇。'},
-  {id:'doupo',name:'斗破苍穹',cat:'玄幻',author:'天蚕土豆',year:'2009',status:'完本',hot:'🌟 经典',fresh:false,
-   desc:'废柴少年逆袭经典玄幻开篇，国民级 IP。'},
-  {id:'fanren',name:'凡人修仙传',cat:'仙侠',author:'忘语',year:'2008',status:'完本',hot:'🌟 经典',fresh:false,
-   desc:'"凡人流"修仙开山作，写实稳健的修仙长生之路（已完本）。'},
-  {id:'xuezhong',name:'雪中悍刀行',cat:'武侠',author:'烽火戏诸侯',year:'2012',status:'完本',hot:'🌟 经典',fresh:false,
-   desc:'庙堂与江湖交织的武侠群像，文风老辣（已完本）。'},
-  {id:'zhetian',name:'遮天',cat:'玄幻',author:'辰东',year:'2009',status:'完本',hot:'🌟 经典',fresh:false,
-   desc:'九龙拉棺开篇的东方玄幻，宏大世界观与热血修行（已完本）。'},
-  {id:'quanzhi',name:'全职高手',cat:'游戏',author:'蝴蝶蓝',year:'2011',status:'完本',hot:'🌟 经典',fresh:false,
-   desc:'电竞荣耀重生，兴欣战队热血竞技（已完本）。'}
- ],
- study:[
-  {id:'bili',name:'哔哩哔哩',cat:'编程',sub:'video',desc:'海量免费教程：编程、考研、科普、技能全覆盖。',url:'https://www.bilibili.com',fresh:false},
-  {id:'mooc',name:'中国大学MOOC',cat:'考试',sub:'video',desc:'国内高校公开课，文凭课与通识课免费学。',url:'https://www.icourse163.org',fresh:false},
-  {id:'fcc',name:'freeCodeCamp',cat:'编程',sub:'video',desc:'免费前端/全栈开发系统课程与认证。',url:'https://www.freecodecamp.org',fresh:false},
-  {id:'b3',name:'3Blue1Brown',cat:'数学',sub:'video',desc:'用动画讲透线性代数、微积分等数学概念。',url:'https://www.3blue1brown.com',fresh:false},
-  {id:'khan',name:'可汗学院（中文）',cat:'数学',sub:'video',desc:'数学、科学、经济等系统化基础课程。',url:'https://zh.khanacademy.org',fresh:false},
-  {id:'duo',name:'多邻国 Duolingo',cat:'语言',sub:'video',desc:'游戏化外语学习，多语种日常打卡。',url:'https://www.duolingo.com',fresh:false},
-  {id:'veritasium',name:'Veritasium',cat:'科普',sub:'video',desc:'硬核科学科普频道，物理与实验演示。',url:'https://www.youtube.com/@veritasium',fresh:false},
-  {id:'wiki',name:'维基百科',cat:'百科',sub:'text',desc:'自由协作知识库，查资料首选。',url:'https://zh.wikipedia.org',fresh:false},
-  {id:'baidu_baike',name:'百度百科',cat:'百科',sub:'text',desc:'中文综合性百科，词条量巨大。',url:'https://baike.baidu.com',fresh:false},
-  {id:'weread',name:'微信读书',cat:'图书',sub:'text',desc:'海量正版图书与出版物，随时阅读。',url:'https://weread.qq.com',fresh:false},
-  {id:'gutenberg',name:'Project Gutenberg',cat:'图书',sub:'text',desc:'大量版权过期英文名著免费下载。',url:'https://www.gutenberg.org',fresh:false},
-  {id:'douban',name:'豆瓣读书',cat:'图书',sub:'text',desc:'书影音评分与书单发现。',url:'https://book.douban.com',fresh:false},
-  {id:'wenku',name:'百度文库',cat:'文档',sub:'text',desc:'论文、报告、课件等文档检索。',url:'https://wenku.baidu.com',fresh:false},
-  {id:'zhihu',name:'知乎',cat:'文档',sub:'text',desc:'问答与深度长文，各垂类经验沉淀。',url:'https://www.zhihu.com',fresh:false},
-  {id:'arxiv',name:'arXiv',cat:'文档',sub:'text',desc:'学术论文预印本库（理工科前沿）。',url:'https://arxiv.org',fresh:false}
- ]
+  games:[
+    {id:"genshin",name:"原神",cat:"开放世界",year:2020,platform:"PC/PS/手机",dev:"miHoYo",img:"https://cdn.akamai.steamstatic.com/steam/apps/1742930/header.jpg",fresh:false,desc:"跨越尘世的探索之旅"},
+    {id:"zzz",name:"绝区零",cat:"动作",year:2024,platform:"PC/手机",dev:"miHoYo",img:"https://cdn.akamai.steamstatic.com/steam/apps/2121980/header.jpg",fresh:false,desc:"都市动作冒险"},
+    {id:"hsr",name:"崩坏：星穹铁道",cat:"回合制",year:2023,platform:"PC/手机",dev:"miHoYo",img:"https://cdn.akamai.steamstatic.com/steam/apps/2062520/header.jpg",fresh:false,desc:"银河冒险策略RPG"},
+    {id:"wzry",name:"王者荣耀",cat:"MOBA",year:2015,platform:"手机",dev:"天美",img:"",fresh:false,desc:"国民级MOBA手游"},
+    {id:"lol",name:"英雄联盟",cat:"MOBA",year:2009,platform:"PC",dev:"Riot",img:"https://cdn.akamai.steamstatic.com/steam/apps/2173500/header.jpg",fresh:false,desc:"经典MOBA端游"},
+    {id:"dota2",name:"DOTA2",cat:"MOBA",year:2013,platform:"PC",dev:"Valve",img:"https://cdn.akamai.steamstatic.com/steam/apps/570/header.jpg",fresh:false,desc:"硬核MOBA"},
+    {id:"naraka",name:"永劫无间",cat:"动作",year:2021,platform:"PC",dev:"24工作室",img:"https://cdn.akamai.steamstatic.com/steam/apps/1203220/header.jpg",fresh:false,desc:"武侠吃鸡"},
+    {id:"pubg",name:"绝地求生",cat:"射击",year:2017,platform:"PC/主机",dev:"KRAFTON",img:"https://cdn.akamai.steamstatic.com/steam/apps/578080/header.jpg",fresh:false,desc:"战术竞技射击"},
+    {id:"valorant",name:"无畏契约",cat:"射击",year:2020,platform:"PC",dev:"Riot",img:"",fresh:false,desc:"5v5战术射击"},
+    {id:"mc",name:"我的世界",cat:"沙盒",year:2011,platform:"PC/主机/手机",dev:"Mojang",img:"https://cdn.akamai.steamstatic.com/steam/apps/1672970/header.jpg",fresh:false,desc:"无限创造的沙盒世界"},
+    {id:"eldenring",name:"艾尔登法环",cat:"魂类",year:2022,platform:"PC/PS/Xbox",dev:"FromSoftware",img:"https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",fresh:false,desc:"开放世界魂系巅峰"},
+    {id:"wukong",name:"黑神话：悟空",cat:"动作",year:2024,platform:"PC/PS5",dev:"游戏科学",img:"https://cdn.akamai.steamstatic.com/steam/apps/2358720/header.jpg",fresh:false,desc:"国产3A动作巨作"},
+    {id:"totk",name:"塞尔达传说：王国之泪",cat:"开放世界",year:2023,platform:"Switch",dev:"任天堂",img:"",fresh:false,desc:"任天堂开放世界神作"},
+    {id:"nioh3",name:"仁王3",cat:"动作",year:2026,platform:"PC/PS5",dev:"光荣特库摩",img:"",fresh:true,desc:"战国动作RPG新作"},
+    {id:"szerol",name:"影之刃零",cat:"动作",year:2026,platform:"PC/PS5",dev:"灵游坊",img:"",fresh:true,desc:"国产黑暗武侠动作"},
+    {id:"gta6",name:"GTA6",cat:"开放世界",year:2025,platform:"PC/主机",dev:"Rockstar",img:"",fresh:true,desc:"最受期待的开放世界"},
+    {id:"wow",name:"魔兽世界",cat:"MMORPG",year:2004,platform:"PC",dev:"暴雪",img:"https://cdn.akamai.steamstatic.com/steam/apps/2289410/header.jpg",fresh:false,desc:"经典MMORPG"},
+    {id:"nh",name:"怪物猎人：荒野",cat:"动作",year:2025,platform:"PC/主机",dev:"Capcom",img:"https://cdn.akamai.steamstatic.com/steam/apps/2246340/header.jpg",fresh:true,desc:"最新怪物猎人"},
+    {id:"ymzx",name:"明末：渊虚之羽",cat:"魂类",year:2025,platform:"PC/主机",dev:"灵泽科技",img:"",fresh:true,desc:"国产魂类新作"},
+    {id:"lovesky",name:"恋与深空",cat:"乙女",year:2024,platform:"手机",dev:"叠纸",img:"",fresh:false,desc:"3D乙女恋爱"},
+    {id:"ds2",name:"死亡搁浅2",cat:"冒险",year:2025,platform:"PS5/PC",dev:"Kojima",img:"",fresh:true,desc:"小岛秀夫新作"},
+    {id:"cv2",name:"噬血代码2",cat:"魂类",year:2025,platform:"PC/主机",dev:"万代南梦宫",img:"",fresh:true,desc:"吸血鬼动作RPG续作"},
+    {id:"7ds",name:"七大罪：起源",cat:"开放世界",year:2025,platform:"PC/手机",dev:"Netmarble",img:"",fresh:true,desc:"漫改开放世界"},
+    {id:"dfsw",name:"巅峰守卫",cat:"塔防",year:2024,platform:"PC/手机",dev:"鹰角",img:"",fresh:true,desc:"策略塔防新游"},
+    {id:"palworld",name:"幻兽帕鲁",cat:"生存",year:2024,platform:"PC/Xbox",dev:"Pocketpair",img:"https://cdn.akamai.steamstatic.com/steam/apps/1623730/header.jpg",fresh:false,desc:"宝可梦式生存建造"},
+    {id:"hz",name:"霍格沃茨之遗",cat:"RPG",year:2023,platform:"PC/主机",dev:"Avalanche",img:"https://cdn.akamai.steamstatic.com/steam/apps/990080/header.jpg",fresh:false,desc:"哈利波特开放世界"},
+    {id:"bg3",name:"博德之门3",cat:"CRPG",year:2023,platform:"PC/主机",dev:"Larian",img:"https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg",fresh:false,desc:"年度RPG神作"},
+    {id:"re4",name:"生化危机4重制版",cat:"恐怖",year:2023,platform:"PC/主机",dev:"Capcom",img:"https://cdn.akamai.steamstatic.com/steam/apps/2050650/header.jpg",fresh:false,desc:"经典重制巅峰"},
+    {id:"sf6",name:"街霸6",cat:"格斗",year:2023,platform:"PC/主机",dev:"Capcom",img:"https://cdn.akamai.steamstatic.com/steam/apps/1364780/header.jpg",fresh:false,desc:"格斗游戏新标杆"},
+    {id:"ac6",name:"装甲核心6",cat:"机甲",year:2023,platform:"PC/主机",dev:"FromSoftware",img:"https://cdn.akamai.steamstatic.com/steam/apps/1888160/header.jpg",fresh:false,desc:"机甲动作大作"},
+    {id:"starfield",name:"星空",cat:"RPG",year:2023,platform:"PC/Xbox",dev:"Bethesda",img:"https://cdn.akamai.steamstatic.com/steam/apps/1716740/header.jpg",fresh:false,desc:"太空探索RPG"},
+    {id:"hifi",name:"Hi-Fi Rush",cat:"动作",year:2023,platform:"PC/Xbox",dev:"Tango",img:"https://cdn.akamai.steamstatic.com/steam/apps/1817230/header.jpg",fresh:false,desc:"节奏动作爽游"},
+    {id:"atomic",name:"原子之心",cat:"射击",year:2023,platform:"PC/主机",dev:"Mundfish",img:"https://cdn.akamai.steamstatic.com/steam/apps/668580/header.jpg",fresh:false,desc:"苏联美学FPS"},
+    {id:"liesofp",name:"匹诺曹的谎言",cat:"魂类",year:2023,platform:"PC/主机",dev:"Neowiz",img:"https://cdn.akamai.steamstatic.com/steam/apps/1627720/header.jpg",fresh:false,desc:"暗黑童话魂like"},
+    {id:"wilds",name:"怪物猎人：荒野",cat:"动作",year:2025,platform:"PC/主机",dev:"Capcom",img:"https://cdn.akamai.steamstatic.com/steam/apps/2246340/header.jpg",fresh:true,desc:"最新怪物猎人"},
+    {id:"mgs3",name:"合金装备3重制版",cat:"潜行",year:2025,platform:"PC/主机",dev:"Konami",img:"",fresh:true,desc:"经典重制"},
+    {id:"inZOI",name:"inZOI 虚拟人生",cat:"模拟",year:2025,platform:"PC",dev:"Krafton",img:"",fresh:true,desc:"韩国版模拟人生"},
+    {id:"subnautica2",name:"深海迷航2",cat:"生存",year:2025,platform:"PC/主机",dev:"Unknown Worlds",img:"",fresh:true,desc:"深海生存续作"},
+    {id:"onimusha",name:"鬼武者：剑之道",cat:"动作",year:2026,platform:"PC/主机",dev:"Capcom",img:"",fresh:true,desc:"鬼武者新作"},
+    {id:"doom",name:"DOOM: The Dark Ages",cat:"射击",year:2025,platform:"PC/主机",dev:"id Software",img:"",fresh:true,desc:"DOOM新作"}
+  ],
+  novels:[
+    {id:"dpcq",name:"斗破苍穹",cat:"玄幻",status:"完结",hot:98,author:"天蚕土豆",desc:"三十年河东三十年河西"},
+    {id:"wldf",name:"武动乾坤",cat:"玄幻",status:"完结",hot:95,author:"天蚕土豆",desc:"少年逆袭成长"},
+    {id:"dz",name:"大主宰",cat:"玄幻",status:"完结",hot:93,author:"天蚕土豆",desc:"大千世界主宰之路"},
+    {id:"ydj",name:"元尊",cat:"玄幻",status:"完结",hot:90,author:"天蚕土豆",desc:"源气修炼世界"},
+    {id:"wmq",name:"万相之王",cat:"玄幻",status:"连载",hot:88,author:"天蚕土豆",desc:"最新玄幻力作"},
+    {id:"qmqs",name:"全职法师",cat:"都市",status:"完结",hot:92,author:"乱",desc:"魔法觉醒都市冒险"},
+    {id:"kd",name:"诡秘之主",cat:"西幻",status:"完结",hot:96,author:"爱潜水的乌贼",desc:"克苏鲁蒸汽朋克"},
+    {id:"cwm",name:"长夜余火",cat:"科幻",status:"完结",hot:85,author:"爱潜水的乌贼",desc:"废土科幻冒险"},
+    {id:"xzm",name:"修真聊天群",cat:"都市",status:"完结",hot:89,author:"圣骑士的传说",desc:"轻松搞笑修真"},
+    {id:"xzx",name:"雪中悍刀行",cat:"武侠",status:"完结",hot:94,author:"烽火戏诸侯",desc:"江湖庙堂权谋"},
+    {id:"jianlai",name:"剑来",cat:"仙侠",status:"连载",hot:95,author:"烽火戏诸侯",desc:"儒家仙侠世界"},
+    {id:"fqxz",name:"凡人修仙传",cat:"仙侠",status:"完结",hot:93,author:"忘语",desc:"凡人逆天修仙"},
+    {id:"mx",name:"魔道祖师",cat:"仙侠",status:"完结",hot:91,author:"墨香铜臭",desc:"修仙恩怨情仇"},
+    {id:"tgcf",name:"天官赐福",cat:"仙侠",status:"完结",hot:90,author:"墨香铜臭",desc:"神仙鬼怪故事"},
+    {id:"qqgj",name:"全球高武",cat:"都市",status:"完结",hot:87,author:"老鹰吃小鸡",desc:"灵气复苏高武"},
+    {id:"xksw",name:"星空武神",cat:"科幻",status:"完结",hot:84,author:"我吃西红柿",desc:"星空武道"},
+    {id:"sw",name:"圣墟",cat:"玄幻",status:"完结",hot:86,author:"辰东",desc:"圣墟世界"},
+    {id:"zz",name:"遮天",cat:"玄幻",status:"完结",hot:92,author:"辰东",desc:"九龙拉棺遮天"},
+    {id:"wm",name:"完美世界",cat:"玄幻",status:"完结",hot:91,author:"辰东",desc:"荒天帝传说"},
+    {id:"sq",name:"神墓",cat:"玄幻",status:"完结",hot:88,author:"辰东",desc:"神墓传奇"},
+    {id:"mqx",name:"没钱修什么仙",cat:"仙侠",status:"连载",hot:85,author:"熊狼狗",desc:"修仙也要讲经济",fresh:true},
+    {id:"xq",name:"雪球",cat:"都市",status:"连载",hot:82,author:"烽火戏诸侯",desc:"都市情感",fresh:true},
+    {id:"wg",name:"万骨",cat:"玄幻",status:"连载",hot:80,author:"我吃西红柿",desc:"骨骼修炼",fresh:true},
+    {id:"xl",name:"仙路",cat:"仙侠",status:"连载",hot:83,author:"忘语",desc:"仙路漫漫",fresh:true},
+    {id:"jh",name:"剑魂",cat:"武侠",status:"连载",hot:81,author:"烽火戏诸侯",desc:"剑魂传承",fresh:true},
+    {id:"lh",name:"龙魂",cat:"玄幻",status:"连载",hot:84,author:"天蚕土豆",desc:"龙魂觉醒",fresh:true},
+    {id:"xx",name:"星修",cat:"科幻",status:"连载",hot:79,author:"我吃西红柿",desc:"星际修炼",fresh:true},
+    {id:"zy",name:"真元",cat:"仙侠",status:"连载",hot:82,author:"忘语",desc:"真元大道",fresh:true},
+    {id:"hs",name:"魂师",cat:"玄幻",status:"连载",hot:80,author:"唐家三少",desc:"魂师修炼",fresh:true},
+    {id:"ms",name:"魔神",cat:"玄幻",status:"连载",hot:83,author:"辰东",desc:"魔神降世",fresh:true},
+    {id:"xs",name:"星神",cat:"科幻",status:"连载",hot:81,author:"我吃西红柿",desc:"星神传说",fresh:true},
+    {id:"zs",name:"战神",cat:"都市",status:"连载",hot:85,author:"老鹰吃小鸡",desc:"战神归来",fresh:true},
+    {id:"ys",name:"医圣",cat:"都市",status:"连载",hot:84,author:"圣骑士的传说",desc:"医道圣手",fresh:true},
+    {id:"ds",name:"道神",cat:"仙侠",status:"连载",hot:82,author:"爱潜水的乌贼",desc:"道神之路",fresh:true},
+    {id:"qs",name:"枪神",cat:"都市",status:"连载",hot:80,author:"乱",desc:"枪神传说",fresh:true},
+    {id:"js",name:"剑神",cat:"武侠",status:"连载",hot:83,author:"烽火戏诸侯",desc:"剑神无双",fresh:true},
+    {id:"ys2",name:"元圣",cat:"玄幻",status:"连载",hot:81,author:"天蚕土豆",desc:"元圣之路",fresh:true}
+  ],
+  study:[
+    {id:"jsjc",name:"JavaScript基础教程",cat:"编程",desc:"JS入门到精通"},
+    {id:"pyjc",name:"Python编程入门",cat:"编程",desc:"Python基础与实战"},
+    {id:"htmlcss",name:"HTML/CSS布局实战",cat:"前端",desc:"网页布局核心技术"},
+    {id:"react",name:"React开发实战",cat:"前端",desc:"现代前端框架"},
+    {id:"vue",name:"Vue3快速上手",cat:"前端",desc:"Vue3组合式API"},
+    {id:"node",name:"Node.js后端开发",cat:"后端",desc:"服务端JavaScript"},
+    {id:"sql",name:"SQL数据库基础",cat:"数据库",desc:"关系型数据库入门"},
+    {id:"git",name:"Git版本控制",cat:"工具",desc:"代码管理必备"},
+    {id:"docker",name:"Docker容器化",cat:"运维",desc:"应用容器化部署"},
+    {id:"linux",name:"Linux系统管理",cat:"运维",desc:"服务器运维基础"},
+    {id:"algo",name:"数据结构与算法",cat:"计算机",desc:"编程核心基础"},
+    {id:"net",name:"计算机网络",cat:"计算机",desc:"网络协议与架构"},
+    {id:"os",name:"操作系统原理",cat:"计算机",desc:"OS核心概念"},
+    {id:"design",name:"设计模式",cat:"架构",desc:"软件设计原则"},
+    {id:"micro",name:"微服务架构",cat:"架构",desc:"分布式系统设计"},
+    {id:"ai",name:"人工智能导论",cat:"AI",desc:"AI基础概念",fresh:true},
+    {id:"ml",name:"机器学习实战",cat:"AI",desc:"ML算法与应用",fresh:true},
+    {id:"dl",name:"深度学习入门",cat:"AI",desc:"神经网络基础",fresh:true},
+    {id:"nlp",name:"自然语言处理",cat:"AI",desc:"NLP技术概览",fresh:true},
+    {id:"cv",name:"计算机视觉",cat:"AI",desc:"图像识别技术",fresh:true},
+    {id:"blockchain",name:"区块链技术",cat:"新技术",desc:"区块链原理",fresh:true},
+    {id:"web3",name:"Web3开发",cat:"新技术",desc:"去中心化应用",fresh:true},
+    {id:"rust",name:"Rust编程",cat:"编程",desc:"安全系统编程",fresh:true},
+    {id:"go",name:"Go语言",cat:"编程",desc:"云原生语言",fresh:true},
+    {id:"k8s",name:"Kubernetes",cat:"运维",desc:"容器编排",fresh:true},
+    {id:"aws",name:"AWS云服务",cat:"云",desc:"亚马逊云入门",fresh:true},
+    {id:"azure",name:"Azure云平台",cat:"云",desc:"微软云服务",fresh:true},
+    {id:"gcp",name:"Google Cloud",cat:"云",desc:"谷歌云平台",fresh:true},
+    {id:"security",name:"网络安全",cat:"安全",desc:"信息安全基础",fresh:true},
+    {id:"crypto",name:"密码学",cat:"安全",desc:"加密技术",fresh:true}
+  ],
+  movies:[
+    {id:"inception",name:"盗梦空间",cat:"科幻",year:2010,desc:"梦境与现实的边界"},
+    {id:"interstellar",name:"星际穿越",cat:"科幻",year:2014,desc:"宇宙探索与亲情"},
+    {id:"darkknight",name:"蝙蝠侠：黑暗骑士",cat:"动作",year:2008,desc:"超级英雄经典"},
+    {id:"shawshank",name:"肖申克的救赎",cat:"剧情",year:1994,desc:"希望与自由"},
+    {id:"godfather",name:"教父",cat:"犯罪",year:1972,desc:"黑帮史诗"},
+    {id:"pulp",name:"低俗小说",cat:"犯罪",year:1994,desc:"非线性叙事经典"},
+    {id:"matrix",name:"黑客帝国",cat:"科幻",year:1999,desc:"虚拟现实觉醒"},
+    {id:"fightclub",name:"搏击俱乐部",cat:"剧情",year:1999,desc:"消费主义反思"},
+    {id:"forrest",name:"阿甘正传",cat:"剧情",year:1994,desc:"美国近代史缩影"},
+    {id:"prestige",name:"致命魔术",cat:"悬疑",year:2006,desc:"魔术师的对决"},
+    {id:"memento",name:"记忆碎片",cat:"悬疑",year:2000,desc:"失忆侦探的故事"},
+    {id:"django",name:"被解救的姜戈",cat:"西部",year:2012,desc:"昆汀西部片"},
+    {id:"inglourious",name:"无耻混蛋",cat:"战争",year:2009,desc:"二战另类历史"},
+    {id:"hateful",name:"八恶人",cat:"西部",year:2015,desc:"暴风雪中的对决"},
+    {id:"once",name:"好莱坞往事",cat:"剧情",year:2019,desc:"60年代好莱坞"},
+    {id:"dune",name:"沙丘",cat:"科幻",year:2021,desc:"史诗科幻巨制"},
+    {id:"dune2",name:"沙丘2",cat:"科幻",year:2024,desc:"保罗的复仇",fresh:true},
+    {id:"oppenheimer",name:"奥本海默",cat:"传记",year:2023,desc:"原子弹之父",fresh:true},
+    {id:"barbie",name:"芭比",cat:"喜剧",year:2023,desc:"粉色世界冒险",fresh:true},
+    {id:"everything",name:"瞬息全宇宙",cat:"科幻",year:2022,desc:"多元宇宙冒险",fresh:true}
+  ]
 };
-
-/* ============ 工具 ============ */
-function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function hue(id){let s=0;for(const c of id)s=(s*31+c.charCodeAt(0))>>>0;return s%360;}
-function cover(id){const h=hue(id);return `linear-gradient(150deg,hsl(${h},58%,46%),hsl(${(h+45)%360},62%,32%))`}
-function catEmoji(cat){
-  const m={开放世界:'🌍',MOBA:'⚔️',射击:'🎯',沙盒:'🧱',魂系:'💀',动作:'🗡️',二次元:'✨',武侠:'🏮',派对:'🎉',MMO:'🐉',乙女:'🌸',
-    仙侠:'🪄',玄幻:'🔥',都市:'🏙️',科幻:'🚀',武道:'🥋',轻小说:'📺',游戏:'🎮',末世:'🌑',历史:'📜',
-    编程:'💻',数学:'📐',语言:'🔤',科普:'🔬',考试:'📝',百科:'📚',图书:'📖',文档:'📄'};
-  return m[cat]||'🎮';
-}
-function fmt(d){const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`}
-function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
-
-/* 状态徽章 */
-const ST={playing:{t:'在玩',c:'st-playing'},wish:{t:'想玩',c:'st-wish'},done:{t:'已通关',c:'st-done'},
-  drop:{t:'弃坑',c:'st-drop'},reading:{t:'追更中',c:'st-reading'},learning:{t:'学习中',c:'st-learning'},
-  finished:{t:'已学完',c:'st-finished'}};
-function stBadge(v){return v&&ST[v]?`<span class="stbadge ${ST[v].c}">${ST[v].t}</span>`:'';}
-function stars(mod,id,cur){let h='';for(let i=1;i<=5;i++)h+=`<span class="star ${i<=cur?'on':''}" data-act="rate" data-rating="${i}" data-mod="${mod}" data-id="${id}">★</span>`;return `<span class="stars">${h}</span>`;}
-
-/* 自定义封面（localStorage 存 base64，随导出备份） */
-function effImg(mod,id){return localStorage.getItem('yz_img_'+mod+'_'+id)||null;}
-function coverBlock(it,mod,opts){
-  opts=opts||{};
-  const img=effImg(mod,it.id)||it.img;
-  const e=catEmoji(it.cat);
-  return `<div class="cover" style="background:${cover(it.id)}">
-    ${img?`<img src="${esc(img)}" alt="" onerror="this.remove()">`:''}
-    ${opts.badge?`<span class="badge-top">${esc(opts.badge)}</span>`:''}
-    ${it.fresh?`<span class="fresh">最新</span>`:''}
-    <span class="emoji">${e}</span>
-    <span class="cv-name">${esc(it.name)}</span>
-  </div>`;
-}
-
-/* ============ 存储 ============ */
-const getList=mod=>mod==='diy'?load('diy'):(DATA[mod]||[]);
-const getItem=(mod,id)=>getList(mod).find(x=>x.id===id);
-function load(k){try{return JSON.parse(localStorage.getItem('yz_'+k)||'[]')}catch(e){return[]}}
-function save(k,v){localStorage.setItem('yz_'+k,JSON.stringify(v))}
-function shelf(){return load('shelf')}
+const QUOTES=[
+  ["知之者不如好之者，好之者不如乐之者","孔子"],
+  ["路漫漫其修远兮，吾将上下而求索","屈原"],
+  ["天行健，君子以自强不息","周易"],
+  ["不积跬步，无以至千里","荀子"],
+  ["业精于勤，荒于嬉","韩愈"],
+  ["博学之，审问之，慎思之，明辨之，笃行之","礼记"],
+  ["千里之行，始于足下","老子"],
+  ["学而不思则罔，思而不学则殆","孔子"]
+];
+const CAT_EMOJI={"开放世界":"🌍","动作":"⚔️","回合制":"🎲","MOBA":"🏆","射击":"🔫","沙盒":"⛏️","魂类":"💀","乙女":"💕","冒险":"🎒","塔防":"🏰","生存":"🏕️","RPG":"🎭","恐怖":"🧟","格斗":"🥊","机甲":"🤖","潜行":"🗡️","模拟":"🏠","玄幻":"🔮","都市":"🏙️","西幻":"🐉","科幻":"🚀","武侠":"⚔️","仙侠":"☁️","编程":"💻","前端":"🎨","后端":"⚙️","数据库":"🗄️","工具":"🛠️","运维":"🔧","计算机":"🖥️","架构":"🏗️","AI":"🤖","新技术":"🔬","云":"☁️","安全":"🔒","剧情":"🎬","犯罪":"🔪","悬疑":"🧩","西部":"🤠","战争":"⚔️","传记":"📖","喜剧":"😄"};
+const ST={playing:{t:"游玩中",c:"#34d399"},wish:{t:"想玩",c:"#fbbf24"},done:{t:"已通关",c:"#60a5fa"},drop:{t:"搁置",c:"#94a3b8"},reading:{t:"追更中",c:"#34d399"},learning:{t:"学习中",c:"#fbbf24"},finished:{t:"已完成",c:"#60a5fa"}};
+const app=document.getElementById('app');
+const toastEl=document.getElementById('toast');
+function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function hue(id){let h=0;for(let i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))%360;return h}
+function cover(id){const h=hue(id);return `linear-gradient(135deg,hsl(${h},58%,46%),hsl(${(h+40)%360},58%,36%))`}
+function catEmoji(c){return CAT_EMOJI[c]||'📦'}
+function fmt(n){return n>=1000?(n/1000).toFixed(1)+'k':n}
+function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),2000)}
+function nick(){return localStorage.getItem('yz_nick')||''}
+function setNick(n){localStorage.setItem('yz_nick',n)}
+function shelf(){try{return JSON.parse(localStorage.getItem('yz_shelf')||'[]')}catch(e){return[]}}
+function saveShelf(arr){localStorage.setItem('yz_shelf',JSON.stringify(arr))}
 function inShelf(mod,id){return shelf().some(x=>x.mod===mod&&x.id===id)}
-function toggleShelf(mod,id){let s=shelf();const i=s.findIndex(x=>x.mod===mod&&x.id===id);
-  if(i>=0)s.splice(i,1);else{const it=getItem(mod,id);s.push({mod,id,name:it?it.name:'',cat:it?it.cat:''})}
-  save('shelf',s);refreshShelfBadge();}
-function refreshShelfBadge(){$('#shelfBadge').textContent=shelf().length;}
-function getTime(mod,id){try{return JSON.parse(localStorage.getItem('yz_time_'+mod+'_'+id)||'{}')}catch(e){return{}}}
-function setTime(mod,id,obj){localStorage.setItem('yz_time_'+mod+'_'+id,JSON.stringify(obj))}
+function toggleShelf(mod,id){const s=shelf();const i=s.findIndex(x=>x.mod===mod&&x.id===id);if(i>=0){s.splice(i,1);toast('已移出书架')}else{s.push({mod,id,addAt:Date.now()});toast('已加入书架')}saveShelf(s);updateStatus()}
+function getTime(mod,id){try{return JSON.parse(localStorage.getItem(`yz_time_${mod}_${id}`)||'{}')}catch(e){return{}}}
+function setTime(mod,id,obj){localStorage.setItem(`yz_time_${mod}_${id}`,JSON.stringify(obj))}
 function stateMap(){try{return JSON.parse(localStorage.getItem('yz_state')||'{}')}catch(e){return{}}}
-function getState(mod,id){return stateMap()[mod+':'+id]||{}}
-function setState(mod,id,obj){const m=stateMap();m[mod+':'+id]=Object.assign({},m[mod+':'+id],obj);localStorage.setItem('yz_state',JSON.stringify(m));}
-
-/* ============ 主题 ============ */
-function setTheme(t){document.documentElement.dataset.theme=t;localStorage.setItem('yz_theme',t);$('#themeBtn').textContent=t==='light'?'🌙':'☀️';}
-
-/* ============ 导出 / 导入 ============ */
-function exportData(){
-  const keys=Object.keys(localStorage).filter(k=>k.startsWith('yz_'));
-  const obj={app:'my-site',exported:fmt(new Date()),items:{}};
-  keys.forEach(k=>obj.items[k]=localStorage.getItem(k));
-  const blob=new Blob([JSON.stringify(obj,null,1)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='我的小站备份-'+new Date().toISOString().slice(0,10)+'.json';
-  document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
-  toast('已导出备份文件（含评论/时长/状态/书架/封面）');
-}
-function importData(file){
-  const rd=new FileReader();
-  rd.onload=()=>{try{
-    const d=JSON.parse(rd.result);
-    if(!d.items||typeof d.items!=='object')throw 0;
-    let n=0;Object.entries(d.items).forEach(([k,v])=>{if(k.startsWith('yz_')){localStorage.setItem(k,v);n++;}});
-    toast('导入成功：'+n+' 项数据已恢复');setTimeout(()=>location.reload(),800);
-  }catch(e){toast('导入失败：文件格式不正确');}};
-  rd.readAsText(file);
-}
-
-/* ============ 路由 ============ */
-function router(){
-  const raw=location.hash.slice(1)||'/';
-  const qi=raw.indexOf('?');
-  const path=qi>=0?raw.slice(0,qi):raw;
-  const query=qi>=0?raw.slice(qi+1):'';
-  const parts=path.split('/').filter(Boolean);
-  const mod=parts[0]||'home';
-  setActiveNav(mod);
-  if(mod==='home')return renderHome();
-  if(mod==='search')return renderSearch(new URLSearchParams(query).get('q')||'');
-  if(mod==='shelf')return renderShelf();
-  if(['games','novels','study','diy'].includes(mod)){
-    if(parts[1])return renderDetail(mod,parts[1]);
-    return renderList(mod);
-  }
-  renderHome();
-}
-function setActiveNav(mod){document.querySelectorAll('#nav a').forEach(a=>{
-  const t=a.getAttribute('href').slice(2);a.classList.toggle('active',t===mod);});}
-
-/* ============ 首页仪表盘 ============ */
-function renderHome(){
-  const now=new Date();const hr=now.getHours();
-  const greet=hr<5?'夜深了，还在逛小站 🌙':hr<9?'早上好 ☀️':hr<12?'上午好 🌤️':hr<14?'中午好 🍜':hr<18?'下午好 ☕':'晚上好 🌆';
-  const dateStr=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${'日一二三四五六'[now.getDay()]}`;
-  const seed=Number(String(now.getFullYear())+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0'));
-  const pickG=DATA.games[seed%DATA.games.length];
-  const pickN=DATA.novels[(seed*7)%DATA.novels.length];
-  const pickS=DATA.study[(seed*13)%DATA.study.length];
-  const sm=stateMap();
-  const playing=DATA.games.map(g=>({g,st:sm['games:'+g.id]||{}}))
-    .filter(x=>x.st.status==='playing').map(x=>({it:x.g,h:Number(getTime('games',x.g.id).game)||0}))
-    .sort((a,b)=>b.h-a.h).slice(0,3);
-  const reading=DATA.novels.map(n=>({n,st:sm['novels:'+n.id]||{}}))
-    .filter(x=>Number(x.st.chapter)>0).sort((a,b)=>(b.st.chapter||0)-(a.st.chapter||0)).slice(0,3);
-  const rated=DATA.games.map(g=>({g,st:sm['games:'+g.id]||{}}))
-    .filter(x=>x.st.rating).sort((a,b)=>(b.st.rating||0)-(a.st.rating||0)).slice(0,5);
-  const feed=[...DATA.games.filter(g=>g.fresh).map(g=>({m:'games',it:g})),
-    ...DATA.novels.filter(n=>n.fresh).map(n=>({m:'novels',it:n}))].slice(0,6);
-  const s=shelf();
-  let gameH=0,useH=0;
-  s.forEach(x=>{const t=getTime(x.mod,x.id);gameH+=Number(t.game)||0;useH+=Number(t.use)||0;});
-  const pic=(it,mod,tag)=>`<div class="pick" data-href="#/${mod}/${it.id}">
-    <div class="pcover" style="background:${cover(it.id)}">
-      ${(effImg(mod,it.id)||it.img)?`<img src="${esc(effImg(mod,it.id)||it.img)}" alt="" onerror="this.remove()">`:''}
-      <span class="emoji">${catEmoji(it.cat)}</span>
-    </div>
-    <div style="min-width:0">
-      <div class="pt">${esc(it.name)}</div>
-      <div class="pm">${tag} · ${esc(it.cat)}</div>
-    </div></div>`;
-  app.innerHTML=`
-    <div class="greet"><h1>${greet}</h1><span class="date">${dateStr}</span></div>
-    <div class="stats">
-      <div class="stat"><b>${DATA.games.length}</b><span>🎮 游戏</span></div>
-      <div class="stat"><b>${DATA.novels.length}</b><span>📖 小说</span></div>
-      <div class="stat"><b>${DATA.study.length}</b><span>📚 学习资料</span></div>
-      <div class="stat"><b>${s.length}</b><span>📑 书架收藏</span></div>
-      <div class="stat"><b>${gameH}h</b><span>累计游戏时长</span></div>
-      <div class="stat"><b>${useH}h</b><span>累计使用时长</span></div>
-    </div>
-    <div class="sec"><h3>🎯 今日推荐<em>每天自动换一批</em></h3>
-      <div class="pickrow">${pic(pickG,'games','🎮 游戏')}${pic(pickN,'novels','📖 小说')}${pic(pickS,'study','📚 学习')}</div>
-    </div>
-    <div class="cols">
-      <div>
-        <div class="sec"><h3>🎮 最近在玩</h3>
-          ${playing.length?playing.map(x=>`<div class="rankline" data-href="#/games/${x.it.id}" data-i="0">
-            <span class="rn">${esc(x.it.name)}</span><span class="rm">${x.h}h · ${esc(x.it.cat)}</span></div>`).join('')
-            :'<div class="empty" style="padding:16px">还没有"在玩"的游戏，去详情页设置状态吧</div>'}
-        </div>
-        <div class="sec"><h3>📖 追更进度</h3>
-          ${reading.length?reading.map(x=>`<div class="rankline" data-href="#/novels/${x.n.id}" data-i="0">
-            <span class="rn">${esc(x.n.name)}</span><span class="rm">读到第 ${x.st.chapter} 章</span></div>`).join('')
-            :'<div class="empty" style="padding:16px">还没有追更记录，去小说详情页填写"读到第几章"吧</div>'}
-        </div>
-      </div>
-      <div>
-        <div class="sec"><h3>⭐ 我的高分推荐</h3>
-          ${rated.length?rated.map((x,i)=>`<div class="rankline" data-href="#/games/${x.g.id}" data-i="${i}">
-            <span class="ri">${i+1}</span><span class="rn">${esc(x.g.name)}</span><span class="rm">${'★'.repeat(x.st.rating)}</span></div>`).join('')
-            :'<div class="empty" style="padding:16px">给游戏评分后，这里会出现高分推荐</div>'}
-        </div>
-        <div class="sec"><h3>🆕 最新上新</h3>
-          <div class="feedline">${feed.map(x=>`<a href="#/${x.m}/${x.it.id}">${esc(x.it.name)}</a>`).join('')}</div>
-        </div>
-      </div>
-    </div>
-    <div class="sec"><h3>📂 内容模块</h3>
-      <div class="mods">
-        ${Object.entries(MODS).map(([k,v])=>`<div class="modcard" data-href="#/${k}">
-          <div class="ico">${v.icon}</div><h3>${v.name}</h3>
-          <p>${k==='games'?DATA.games.length+' 款作品':k==='novels'?DATA.novels.length+' 部作品':k==='study'?DATA.study.length+' 个资源':'自定义模块，自己加内容'}</p></div>`).join('')}
-      </div>
-    </div>`;
-  app.querySelectorAll('[data-href]').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
-}
-
-/* ============ 列表：游戏（IGN/游民风格） ============ */
-function renderGamesList(){
-  const list=DATA.games;
-  const cats=['全部','最新上新',...Array.from(new Set(list.map(x=>x.cat)))];
-  const cur=new URLSearchParams(location.hash.split('?')[1]||'').get('cat')||'全部';
-  const filtered=cur==='全部'?list:(cur==='最新上新'?list.filter(x=>x.fresh):list.filter(x=>x.cat===cur));
-  const feat=list.find(x=>x.fresh)||list[0];
-  app.innerHTML=`
-    <div class="crumbs"><a href="#/">首页</a> / 游戏</div>
-    <h1 class="page">游戏（${list.length}）</h1>
-    <p class="page-sub">参考游戏资讯站排版 · 点封面进详情 · 详情页可设状态/评分/时长/上传封面</p>
-    <div class="hero">
-      ${feat.img?`<img src="${esc(feat.img)}" alt="" onerror="this.remove()">`:''}
-      <div class="hgrad"></div>
-      <div class="hcontent">
-        <h2 class="ht">${esc(feat.name)}</h2>
-        <div class="hm">${esc(feat.dev||'')} · ${esc(feat.cat)} · ${esc(feat.year)}</div>
-        <div class="htags"><span>${esc(feat.platform)}</span>${feat.fresh?'<span>🆕 新作</span>':''}</div>
-        <div class="row-btns">
-          <a class="btn" href="#/games/${feat.id}">查看详情</a>
-          <a class="btn ghost" href="${esc(feat.url||'#')}" target="_blank" rel="noopener">前往官网</a>
-        </div>
-      </div>
-    </div>
-    <div class="chips">${cats.map(c=>`<span class="chip ${c===cur?'on':''}" data-cat="${esc(c)}">${esc(c)}</span>`).join('')}</div>
-    <div class="grid">
-      ${filtered.map((it,i)=>{const st=getState('games',it.id).status;
-        return `<div class="card" data-href="#/games/${it.id}" style="animation-delay:${Math.min(i*40,320)}ms">
-          ${coverBlock(it,'games',{badge:it.platform})}
-          <div class="meta"><div class="nm">${esc(it.name)}</div><div class="ct">${esc(it.cat)} · ${esc(it.dev||'')}</div>
-          ${st?`<div class="stline">${stBadge(st)}</div>`:''}</div>
-        </div>`;}).join('')}
-    </div>`;
-  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>location.hash=`#/games?cat=${encodeURIComponent(c.dataset.cat)}`);
-  app.querySelectorAll('.card').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
-}
-
-/* ============ 列表：小说（起点风格排行榜） ============ */
-function renderNovelsList(){
-  const list=DATA.novels;
-  const cats=['全部','最新上新',...Array.from(new Set(list.map(x=>x.cat)))];
-  const cur=new URLSearchParams(location.hash.split('?')[1]||'').get('cat')||'全部';
-  const filtered=cur==='全部'?list:(cur==='最新上新'?list.filter(x=>x.fresh):list.filter(x=>x.cat===cur));
-  app.innerHTML=`
-    <div class="crumbs"><a href="#/">首页</a> / 小说</div>
-    <h1 class="page">小说热榜（${list.length}）</h1>
-    <p class="page-sub">参考起点中文网榜单排版 · 点条目进详情 · 详情页可记追更进度/评分</p>
-    <div class="chips">${cats.map(c=>`<span class="chip ${c===cur?'on':''}" data-cat="${esc(c)}">${esc(c)}</span>`).join('')}</div>
-    <div class="ranklist">
-      ${filtered.map((it,i)=>{const st=getState('novels',it.id);
-        return `<div class="rankrow" data-href="#/novels/${it.id}" style="animation-delay:${Math.min(i*35,320)}ms">
-          <span class="rk">${i+1}</span>
-          <div class="bcover" style="background:${cover(it.id)}">
-            ${(effImg('novels',it.id)||it.img)?`<img src="${esc(effImg('novels',it.id)||it.img)}" alt="" onerror="this.remove()">`:''}
-            ${it.fresh?'<span class="fresh">新</span>':''}
-            <span class="emoji">📖</span>
-            <span class="cv-name">${esc(it.name)}</span>
-          </div>
-          <div class="binfo">
-            <div class="bt">${esc(it.name)} ${stBadge(st.status)}</div>
-            <div class="bm">${esc(it.author)} · ${esc(it.cat)} · ${esc(it.status)}${st.chapter?` · 读到第 ${st.chapter} 章`:''}</div>
-            <div class="bd">${esc(it.desc)}</div>
-            <div class="btags">
-              <span class="htag">${esc(it.hot||'')}</span>
-              <span class="statag">${esc(it.year)}</span>
-              ${it.fresh?'<span class="statag" style="color:#ff9a3d;border-color:#ff9a3d">最新上新</span>':''}
-            </div>
-          </div>
-        </div>`;}).join('')}
-    </div>`;
-  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>location.hash=`#/novels?cat=${encodeURIComponent(c.dataset.cat)}`);
-  app.querySelectorAll('.rankrow').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
-}
-
-/* ============ 列表：学习资料 / DIY（卡片网格） ============ */
-function renderStudyList(){
-  const list=DATA.study;
-  const cats=['全部',...Array.from(new Set(list.map(x=>x.cat)))];
-  const cur=new URLSearchParams(location.hash.split('?')[1]||'').get('cat')||'全部';
-  const filtered=cur==='全部'?list:list.filter(x=>x.cat===cur);
-  app.innerHTML=`
-    <div class="crumbs"><a href="#/">首页</a> / 学习资料</div>
-    <h1 class="page">学习资料（${list.length}）</h1>
-    <p class="page-sub">视频 + 文本 · 点卡片进详情 · 可记学习进度</p>
-    <div class="chips">${cats.map(c=>`<span class="chip ${c===cur?'on':''}" data-cat="${esc(c)}">${esc(c)}</span>`).join('')}</div>
-    <div class="grid">
-      ${filtered.map((it,i)=>{const st=getState('study',it.id).status;
-        return `<div class="card" data-href="#/study/${it.id}" style="animation-delay:${Math.min(i*40,320)}ms">
-          ${coverBlock(it,'study',{badge:it.sub==='video'?'视频':'文本'})}
-          <div class="meta"><div class="nm">${esc(it.name)}</div><div class="ct">${esc(it.cat)}</div>
-          ${st?`<div class="stline">${stBadge(st)}</div>`:''}</div>
-        </div>`;}).join('')}
-    </div>`;
-  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>location.hash=`#/study?cat=${encodeURIComponent(c.dataset.cat)}`);
-  app.querySelectorAll('.card').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
-}
-function renderDIY(){
-  const list=load('diy');
-  app.innerHTML=`
-    <div class="crumbs"><a href="#/">首页</a> / DIY</div>
-    <h1 class="page">🧩 DIY 专区</h1>
-    <p class="page-sub">预留给你的自定义模块，自己加内容（标题/分类/简介/链接）</p>
-    <form class="block" id="diyForm">
-      <h3>添加 DIY 内容</h3>
-      <input class="f-title" placeholder="标题" required style="margin-bottom:10px">
-      <input class="f-cat" placeholder="分类（如：工具/收藏/笔记）" style="margin-bottom:10px">
-      <input class="f-url" placeholder="链接（可选）" style="margin-bottom:10px">
-      <textarea class="f-desc" placeholder="简介（可选）" rows="2"></textarea>
-      <div class="row-btns"><button type="submit" class="btn">添加</button></div>
-    </form>
-    <div class="grid" id="diyGrid" style="margin-top:22px">
-      ${list.map((it,i)=>`<div class="card" data-href="#/diy/${it.id}" style="animation-delay:${Math.min(i*40,320)}ms">
-        ${coverBlock(it,'diy',{badge:it.cat||'未分类'})}
-        <div class="meta"><div class="nm">${esc(it.name)}</div><div class="ct">${esc(it.cat||'未分类')}</div></div>
-      </div>`).join('')}
-    </div>`;
-  $('#diyForm').addEventListener('submit',e=>{
-    e.preventDefault();const f=e.target;
-    const title=f.querySelector('.f-title').value.trim();if(!title)return;
-    const arr=load('diy');arr.push({id:'d'+Date.now(),name:title,cat:f.querySelector('.f-cat').value.trim(),
-      url:f.querySelector('.f-url').value.trim(),desc:f.querySelector('.f-desc').value.trim(),img:null,fresh:false});
-    save('diy',arr);location.hash='#/diy';renderDIY();
-  });
-  app.querySelectorAll('.card').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
-}
-function renderList(mod){
-  if(mod==='novels')return renderNovelsList();
-  if(mod==='study')return renderStudyList();
-  if(mod==='diy')return renderDIY();
-  return renderGamesList();
-}
-
-/* ============ 搜索 ============ */
-function renderSearch(q){
-  $('#searchInput').value=q;
-  q=q.trim().toLowerCase();
-  if(!q){app.innerHTML=`<h1 class="page">搜索</h1><p class="page-sub">在顶部搜索框输入关键词，全站即时查找游戏 / 小说 / 学习资料 / DIY 内容</p>`;return;}
-  const hit=(arr,mod)=>arr.filter(it=>(it.name+it.cat+(it.desc||'')+(it.author||'')+(it.dev||'')+(it.platform||'')).toLowerCase().includes(q)).slice(0,20);
-  const g=hit(DATA.games,'games'),n=hit(DATA.novels,'novels'),s=hit(DATA.study,'study'),d=hit(load('diy'),'diy');
-  const total=g.length+n.length+s.length+d.length;
-  const row=(it,mod,tag)=>`<div class="srow" data-href="#/${mod}/${it.id}" style="animation-delay:${Math.min(parseInt(Math.random()*300),300)}ms">
-    <div class="scover" style="background:${cover(it.id)}">
-      ${(effImg(mod,it.id)||it.img)?`<img src="${esc(effImg(mod,it.id)||it.img)}" alt="" onerror="this.remove()">`:''}
-      <span class="emoji">${catEmoji(it.cat)}</span>
-    </div>
-    <span class="sname">${esc(it.name)}</span>
-    <span class="smeta">${tag} · ${esc(it.cat)}</span></div>`;
-  app.innerHTML=`
-    <div class="crumbs"><a href="#/">首页</a> / 搜索</div>
-    <h1 class="page">🔍 "${esc(q)}" 的搜索结果（${total}）</h1>
-    ${g.length?`<div class="searchgrp"><h3>🎮 游戏（${g.length}）</h3>${g.map(x=>row(x,'games','🎮')).join('')}</div>`:''}
-    ${n.length?`<div class="searchgrp"><h3>📖 小说（${n.length}）</h3>${n.map(x=>row(x,'novels','📖')).join('')}</div>`:''}
-    ${s.length?`<div class="searchgrp"><h3>📚 学习资料（${s.length}）</h3>${s.map(x=>row(x,'study','📚')).join('')}</div>`:''}
-    ${d.length?`<div class="searchgrp"><h3>🧩 DIY（${d.length}）</h3>${d.map(x=>row(x,'diy','🧩')).join('')}</div>`:''}
-    ${total?`<div class="empty" style="margin-top:18px">没找到想要的？去 DIY 专区自己添加 ➕</div>`:''}`;
-  app.querySelectorAll('[data-href]').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
-}
-
-/* ============ 详情分发 ============ */
-function renderDetail(mod,id){
-  const it=getItem(mod,id);
-  if(!it){app.innerHTML=`<div class="empty">未找到该项目。<a href="#/${mod}">返回</a></div>`;return;}
-  if(mod==='novels')return renderNovelsDetail(it);
-  if(mod==='study')return renderStudyDetail(it);
-  return renderGamesDetail(it);
-}
-
-/* 游戏详情 */
-function renderGamesDetail(it){
-  const t=getTime('games',it.id);
-  const st=getState('games',it.id);
-  const onShelf=inShelf('games',it.id);
-  const hasCustom=!!effImg('games',it.id);
-  const related=DATA.games.filter(x=>x.cat===it.cat&&x.id!==it.id).slice(0,6);
-  app.innerHTML=`
-    <div class="crumbs"><a href="#/">首页</a> / <a href="#/games">游戏</a> / ${esc(it.name)}</div>
-    <div class="detail">
-      <div class="dcover" style="background:${cover(it.id)}">
-        ${(effImg('games',it.id)||it.img)?`<img src="${esc(effImg('games',it.id)||it.img)}" alt="" onerror="this.remove()">`:''}
-        <span class="emoji">${catEmoji(it.cat)}</span>
-        <span class="cv-name">${esc(it.name)}</span>
-      </div>
-      <div>
-        <h1>${esc(it.name)} ${stBadge(st.status)}</h1>
-        <div class="tags">
-          <span class="tag">${esc(it.cat)}</span>
-          <span class="tag">${esc(it.platform)}</span>
-          <span class="tag">${esc(it.year)}</span>
-          ${it.dev?`<span class="tag">${esc(it.dev)}</span>`:''}
-          ${it.fresh?'<span class="tag" style="color:#ff9a3d;border-color:#ff9a3d">新作</span>':''}
-        </div>
-        <div class="desc">${esc(it.desc)}</div>
-        <div class="row-btns">
-          <a class="btn" href="${esc(it.url||'#')}" target="_blank" rel="noopener">前往官网</a>
-          <button class="btn ghost" data-act="shelf" data-mod="games" data-id="${it.id}">${onShelf?'✓ 已在书架':'＋ 加入书架'}</button>
-          <button class="btn ghost" data-act="upcover" data-mod="games" data-id="${it.id}">🖼️ 上传封面</button>
-          ${hasCustom?`<button class="btn ghost" data-act="rmcover" data-mod="games" data-id="${it.id}">🗑️ 移除封面</button>`:''}
-        </div>
-        <div class="block"><h3>我的状态</h3>
-          <div class="state-row">
-            <span>状态：</span>
-            <select class="stsel" data-act="status" data-mod="games" data-id="${it.id}">
-              <option value="" ${!st.status?'selected':''}>— 无状态 —</option>
-              <option value="playing" ${st.status==='playing'?'selected':''}>🎮 在玩</option>
-              <option value="wish" ${st.status==='wish'?'selected':''}>⭐ 想玩</option>
-              <option value="done" ${st.status==='done'?'selected':''}>🏆 已通关</option>
-              <option value="drop" ${st.status==='drop'?'selected':''}>💤 弃坑</option>
-            </select>
-            <span>评分：</span>${stars('games',it.id,st.rating||0)}
-          </div></div>
-        <div class="block"><h3>我的评论</h3>
-          <textarea data-cid="games:${it.id}" placeholder="写下你的看法、评分、进度…">${esc(localStorage.getItem('yz_comment_games:'+it.id)||'')}</textarea></div>
-        <div class="block"><h3>时长统计（小时，可自定义）</h3>
-          <div class="time-row">
-            <label>🎮 游戏时长<input type="number" min="0" step="0.5" data-tid="games:${it.id}" data-field="game" value="${t.game||0}">小时</label>
-            <label>⏱️ 使用时长<input type="number" min="0" step="0.5" data-tid="games:${it.id}" data-field="use" value="${t.use||0}">小时</label>
-          </div></div>
-        ${related.length?`<div class="block"><h3>同类型推荐（${esc(it.cat)}）</h3>
-          <div class="rel">${related.map(r=>`<span class="mini" data-href="#/games/${r.id}">${esc(r.name)}</span>`).join('')}</div></div>`:''}
-      </div>
-    </div>`;
-  app.querySelectorAll('[data-href]').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
-}
-
-/* 小说详情 */
-function renderNovelsDetail(it){
-  const t=getTime('novels',it.id);
-  const st=getState('novels',it.id);
-  const onShelf=inShelf('novels',it.id);
-  const hasCustom=!!effImg('novels',it.id);
-  const related=DATA.novels.filter(x=>x.cat===it.cat&&x.id!==it.id).slice(0,6);
-  app.innerHTML=`
-    <div class="crumbs"><a href="#/">首页</a> / <a href="#/novels">小说</a> / ${esc(it.name)}</div>
-    <div class="detail">
-      <div class="dcover" style="background:${cover(it.id)}">
-        ${(effImg('novels',it.id)||it.img)?`<img src="${esc(effImg('novels',it.id)||it.img)}" alt="" onerror="this.remove()">`:''}
-        <span class="emoji">📖</span>
-        <span class="cv-name">${esc(it.name)}</span>
-      </div>
-      <div>
-        <h1>${esc(it.name)} ${stBadge(st.status)}</h1>
-        <div class="tags">
-          <span class="tag">${esc(it.cat)}</span>
-          <span class="tag">${esc(it.author)}</span>
-          <span class="tag">${esc(it.status)}</span>
-          <span class="tag">${esc(it.year)}</span>
-          ${it.fresh?'<span class="tag" style="color:#ff9a3d;border-color:#ff9a3d">最新上新</span>':''}
-        </div>
-        <div class="desc">${esc(it.desc)}</div>
-        <div class="row-btns">
-          <a class="btn" href="https://www.qidian.com/search?kw=${encodeURIComponent(it.name)}" target="_blank" rel="noopener">前往阅读（起点）</a>
-          <button class="btn ghost" data-act="shelf" data-mod="novels" data-id="${it.id}">${onShelf?'✓ 已在书架':'＋ 加入书架'}</button>
-          <button class="btn ghost" data-act="upcover" data-mod="novels" data-id="${it.id}">🖼️ 上传封面</button>
-          ${hasCustom?`<button class="btn ghost" data-act="rmcover" data-mod="novels" data-id="${it.id}">🗑️ 移除封面</button>`:''}
-        </div>
-        <div class="block"><h3>我的状态</h3>
-          <div class="state-row">
-            <span>状态：</span>
-            <select class="stsel" data-act="status" data-mod="novels" data-id="${it.id}">
-              <option value="" ${!st.status?'selected':''}>— 无状态 —</option>
-              <option value="reading" ${st.status==='reading'?'selected':''}>📖 追更中</option>
-              <option value="done" ${st.status==='done'?'selected':''}>✅ 已读完</option>
-              <option value="drop" ${st.status==='drop'?'selected':''}>💤 弃书</option>
-            </select>
-            <span>读到第</span>
-            <input type="number" min="0" step="1" data-act="chapter" data-mod="novels" data-id="${it.id}" value="${st.chapter||''}" style="width:90px" placeholder="章">
-            <span>章</span>
-            <span>评分：</span>${stars('novels',it.id,st.rating||0)}
-          </div></div>
-        <div class="block"><h3>我的书评</h3>
-          <textarea data-cid="novels:${it.id}" placeholder="写下你的书评、进度、追更感受…">${esc(localStorage.getItem('yz_comment_novels:'+it.id)||'')}</textarea></div>
-        <div class="block"><h3>阅读时长（小时，可自定义）</h3>
-          <div class="time-row"><label>⏱️ 阅读时长<input type="number" min="0" step="0.5" data-tid="novels:${it.id}" data-field="use" value="${t.use||0}">小时</label></div></div>
-        ${related.length?`<div class="block"><h3>同分类推荐（${esc(it.cat)}）</h3>
-          <div class="rel">${related.map(r=>`<span class="mini" data-href="#/novels/${r.id}">${esc(r.name)}</span>`).join('')}</div></div>`:''}
-      </div>
-    </div>`;
-  app.querySelectorAll('[data-href]').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
-}
-
-/* 学习详情 */
-function renderStudyDetail(it){
-  const t=getTime('study',it.id);
-  const st=getState('study',it.id);
-  const onShelf=inShelf('study',it.id);
-  const hasCustom=!!effImg('study',it.id);
-  app.innerHTML=`
-    <div class="crumbs"><a href="#/">首页</a> / <a href="#/study">学习资料</a> / ${esc(it.name)}</div>
-    <div class="detail">
-      <div class="dcover" style="background:${cover(it.id)}">
-        ${(effImg('study',it.id)||it.img)?`<img src="${esc(effImg('study',it.id)||it.img)}" alt="" onerror="this.remove()">`:''}
-        <span class="emoji">${catEmoji(it.cat)}</span>
-        <span class="cv-name">${esc(it.name)}</span>
-      </div>
-      <div>
-        <h1>${esc(it.name)} ${stBadge(st.status)}</h1>
-        <div class="tags"><span class="tag">${esc(it.cat)}</span><span class="tag">${it.sub==='video'?'视频':'文本'}</span></div>
-        <div class="desc">${esc(it.desc)}</div>
-        <div class="row-btns">
-          <a class="btn" href="${esc(it.url)}" target="_blank" rel="noopener">前往查看</a>
-          <button class="btn ghost" data-act="shelf" data-mod="study" data-id="${it.id}">${onShelf?'✓ 已在书架':'＋ 加入书架'}</button>
-          <button class="btn ghost" data-act="upcover" data-mod="study" data-id="${it.id}">🖼️ 上传封面</button>
-          ${hasCustom?`<button class="btn ghost" data-act="rmcover" data-mod="study" data-id="${it.id}">🗑️ 移除封面</button>`:''}
-        </div>
-        <div class="block"><h3>我的状态</h3>
-          <div class="state-row">
-            <span>进度：</span>
-            <select class="stsel" data-act="status" data-mod="study" data-id="${it.id}">
-              <option value="" ${!st.status?'selected':''}>未开始</option>
-              <option value="learning" ${st.status==='learning'?'selected':''}>📚 学习中</option>
-              <option value="finished" ${st.status==='finished'?'selected':''}>✅ 已学完</option>
-            </select>
-          </div></div>
-        <div class="block"><h3>我的笔记</h3>
-          <textarea data-cid="study:${it.id}" placeholder="记录学习重点、进度…">${esc(localStorage.getItem('yz_comment_study:'+it.id)||'')}</textarea></div>
-        <div class="block"><h3>学习时长（小时，可自定义）</h3>
-          <div class="time-row"><label>⏱️ 学习时长<input type="number" min="0" step="0.5" data-tid="study:${it.id}" data-field="use" value="${t.use||0}">小时</label></div></div>
-      </div>
-    </div>`;
-  app.querySelectorAll('[data-href]').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
-}
-
-/* ============ 我的书架 ============ */
-function renderShelf(){
-  const s=shelf();
-  let gameH=0,useH=0;
-  s.forEach(x=>{const t=getTime(x.mod,x.id);gameH+=Number(t.game)||0;useH+=Number(t.use)||0;});
-  if(!s.length){app.innerHTML=`<div class="crumbs"><a href="#/">首页</a> / 我的书架</div>
-    <h1 class="page">我的书架</h1><div class="empty">书架还是空的，去各模块点「加入书架」吧。</div>`;return;}
-  app.innerHTML=`
-    <div class="crumbs"><a href="#/">首页</a> / 我的书架</div>
-    <h1 class="page">我的书架（${s.length}）</h1>
-    <p class="page-sub">累计游戏时长 ${gameH}h · 累计使用时长 ${useH}h</p>
-    <div class="grid">
-      ${s.map((x,i)=>{const it=getItem(x.mod,x.id);if(!it)return'';
-        const st=getState(x.mod,x.id).status;
-        return `<div class="card" data-href="#/${x.mod}/${x.id}" style="animation-delay:${Math.min(i*40,320)}ms">
-          ${coverBlock(it,x.mod,{badge:MODS[x.mod].name})}
-          <div class="meta"><div class="nm">${esc(x.name)}</div><div class="ct">${esc(MODS[x.mod].name)}</div>
-          ${st?`<div class="stline">${stBadge(st)}</div>`:''}</div>
-        </div>`;}).join('')}
-    </div>`;
-  app.querySelectorAll('.card').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
-}
-
-/* ============ 事件委托 ============ */
-app.addEventListener('click',e=>{
-  const a=e.target.closest('[data-act]');if(!a)return;
-  const act=a.dataset.act;
-  if(act==='update'){doUpdate();}
-  if(act==='shelf'){toggleShelf(a.dataset.mod,a.dataset.id);renderDetail(a.dataset.mod,a.dataset.id);toast('已更新书架');}
-  if(act==='rate'){setState(a.dataset.mod,a.dataset.id,{rating:Number(a.dataset.rating)});toast('评分已保存 ⭐'+a.dataset.rating);renderDetail(a.dataset.mod,a.dataset.id);}
-  if(act==='upcover'){coverTarget={mod:a.dataset.mod,id:a.dataset.id};$('#coverFile').click();}
-  if(act==='rmcover'){localStorage.removeItem('yz_img_'+a.dataset.mod+'_'+a.dataset.id);toast('已移除自定义封面');renderDetail(a.dataset.mod,a.dataset.id);}
-  if(act==='export'){exportData();}
-  if(act==='import'){$('#importFile').click();}
-  if(act==='deldel'){const arr=load('diy').filter(x=>x.id!==a.dataset.id);save('diy',arr);location.hash='#/diy';renderDIY();}
-});
-app.addEventListener('change',e=>{
-  const t=e.target;
-  if(t.dataset.cid){localStorage.setItem('yz_comment_'+t.dataset.cid,t.value);}
-  if(t.dataset.tid){const [m,id]=t.dataset.tid.split(':');const obj=getTime(m,id);obj[t.dataset.field]=Number(t.value)||0;setTime(m,id,obj);}
-  if(t.dataset.act==='status'){setState(t.dataset.mod,t.dataset.id,{status:t.value});toast('状态已保存');router();}
-  if(t.dataset.act==='chapter'){setState(t.dataset.mod,t.dataset.id,{chapter:Number(t.value)||''});toast('追更进度已保存');router();}
-});
-app.addEventListener('input',e=>{
-  const t=e.target;
-  if(t.dataset.cid){localStorage.setItem('yz_comment_'+t.dataset.cid,t.value);}
-  if(t.dataset.tid){const [m,id]=t.dataset.tid.split(':');const obj=getTime(m,id);obj[t.dataset.field]=Number(t.value)||0;setTime(m,id,obj);}
-});
-let coverTarget=null;
-$('#coverFile').addEventListener('change',e=>{
-  const f=e.target.files[0];if(!f||!coverTarget)return;
-  const rd=new FileReader();
-  rd.onload=()=>{localStorage.setItem('yz_img_'+coverTarget.mod+'_'+coverTarget.id,rd.result);
-    const t=coverTarget;coverTarget=null;toast('封面已更新 🖼️');renderDetail(t.mod,t.id);};
-  rd.readAsDataURL(f);e.target.value='';
-});
-$('#importFile').addEventListener('change',e=>{const f=e.target.files[0];if(f)importData(f);e.target.value='';});
-
-/* 顶栏：搜索 / 主题 / 更新 */
-let searchTimer;
-$('#searchInput').addEventListener('input',e=>{
-  clearTimeout(searchTimer);
-  searchTimer=setTimeout(()=>{const v=e.target.value.trim();
-    if(v)location.hash='#/search?q='+encodeURIComponent(v);
-    else if(location.hash.startsWith('#/search'))location.hash='#/';},300);
-});
-$('#themeBtn').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='light'?'dark':'light'));
-
-/* ============ 每日更新（部署后从 latest.json 同步上新） ============ */
-async function fetchLatest(){
-  try{
-    const r=await fetch('latest.json?t='+Date.now());
-    if(!r.ok)throw 0;
-    const d=await r.json();
-    ['games','novels','study'].forEach(k=>{(d[k]||[]).forEach(n=>{
-      const i=DATA[k].findIndex(x=>x.id===n.id);
-      if(i>=0)Object.assign(DATA[k][i],n);else DATA[k].push(n);
-    });});
-    return d.updated||'';
-  }catch(e){return null;}
-}
-async function doUpdate(){
-  const upd=await fetchLatest();
-  localStorage.setItem('yz_lastupdate',Date.now());
-  $('#lastupdate').textContent='最后更新：'+fmt(new Date())+(upd?('（已同步 '+upd+' 上新）'):'（本地预览）');
-  toast(upd?('已同步最新内容：'+upd):'已刷新（部署后将从 latest.json 每日同步上新）');
-  const h=location.hash;
-  if(h.startsWith('#/diy')&&!h.split('/')[2])return renderDIY();
-  router();
-}
-let autoTimer=null;
-function startAuto(min){if(autoTimer)clearInterval(autoTimer);autoTimer=null;if(min>0)autoTimer=setInterval(doUpdate,min*60000);}
-$('#automin').addEventListener('change',e=>{localStorage.setItem('yz_automin',e.target.value);startAuto(Number(e.target.value));});
-$('#automin').value=localStorage.getItem('yz_automin')||'30';
-startAuto(Number($('#automin').value));
-$('.updbtn').addEventListener('click',doUpdate);
-
-/* ============ 初始化 ============ */
-window.addEventListener('hashchange',()=>{
-  if(location.hash.startsWith('#/diy')&&!location.hash.split('/')[2])return renderDIY();
-  router();
-});
-window.addEventListener('load',()=>{
-  if(localStorage.getItem('yz_theme')==='light')setTheme('light');else setTheme('dark');
-  $('#year').textContent=' · '+new Date().getFullYear();
-  $('#year2').textContent=new Date().getFullYear();
-  const lu=localStorage.getItem('yz_lastupdate');
-  $('#lastupdate').textContent='最后更新：'+(lu?fmt(new Date(Number(lu))):'尚未更新');
-  refreshShelfBadge();
-  const h=location.hash;
-  if(h.startsWith('#/diy')&&!h.split('/')[2])return renderDIY();
-  router();
-  const last=Number(localStorage.getItem('yz_lastsync')||0);
-  if(Date.now()-last>24*3600*1000){doUpdate();}
-  localStorage.setItem('yz_lastsync',Date.now());
-});
+function setState(mod,id,st){const m=stateMap();m[`${mod}:${id}`]=st;localStorage.setItem('yz_state',JSON.stringify(m))}
+function getState(mod,id){return stateMap()[`${mod}:${id}`]||{}}
+function getComment(mod,id){return localStorage.getItem(`yz_comment_${mod}:${id}`)||''}
+function setComment(mod,id,text){localStorage.setItem(`yz_comment_${mod}:${id}`,text)}
+function effImg(mod,id){return localStorage.getItem(`yz_img_${mod}_${id}`)||''}
+function setImg(mod,id,url){localStorage.setItem(`yz_img_${mod}_${id}`,url)}
+function delImg(mod,id){localStorage.removeItem(`yz_img_${mod}_${id}`)}
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('yz_theme',t)}
+function getTheme(){return localStorage.getItem('yz_theme')||'dark'}
+function todayKey(){const d=new Date();return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`}
+function checkins(){try{return JSON.parse(localStorage.getItem('yz_checkins')||'[]')}catch(e){return[]}}
+function addCheckin(){const c=checkins();const k=todayKey();if(!c.includes(k)){c.push(k);localStorage.setItem('yz_checkins',JSON.stringify(c))}}
+function todayDone(){return checkins().includes(todayKey())}
+function streakDays(){const c=checkins().sort();if(!c.length)return 0;let streak=0;const today=todayKey();let check=new Date();for(let i=0;i<365;i++){const key=`${check.getFullYear()}-${check.getMonth()+1}-${check.getDate()}`;if(c.includes(key)){streak++;check.setDate(check.getDate()-1)}else break}return streak}
+function monthHeat(){const c=checkins();const days=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();const curMonth=`${new Date().getFullYear()}-${new Date().getMonth()+1}`;let html='<div style="display:flex;gap:3px;flex-wrap:wrap">';for(let i=1;i<=days;i++){const k=`${curMonth}-${i}`;const active=c.includes(k);html+=`<div style="width:10px;height:10px;border-radius:2px;background:${active?'var(--success)':'var(--border)'}" title="${k}"></div>`}html+='</div>';return html}
+function todayQuote(){const d=new Date();const idx=(d.getFullYear()*366+d.getMonth()*31+d.getDate())%QUOTES.length;return QUOTES[idx]}
+function exportData(){const data={nick:nick(),shelf:shelf(),state:stateMap(),theme:getTheme(),checkins:checkins(),exportedAt:new Date().toISOString()};DATA.games.forEach(g=>{data[`time_games_${g.id}`]=getTime('games',g.id);data[`comment_games:${g.id}`]=getComment('games',g.id);data[`img_games_${g.id}`]=effImg('games',g.id)});DATA.novels.forEach(n=>{data[`time_novels_${n.id}`]=getTime('novels',n.id);data[`comment_novels:${n.id}`]=getComment('novels',n.id);data[`img_novels_${n.id}`]=effImg('novels',n.id)});DATA.study.forEach(s=>{data[`time_study_${s.id}`]=getTime('study',s.id);data[`comment_study:${s.id}`]=getComment('study',s.id)});DATA.movies.forEach(m=>{data[`time_movies_${m.id}`]=getTime('movies',m.id);data[`comment_movies:${m.id}`]=getComment('movies',m.id)});const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mydata_${new Date().toISOString().slice(0,10)}.json`;a.click();toast('数据已导出')}
+function importData(file){const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(data.nick)setNick(data.nick);if(data.shelf)saveShelf(data.shelf);if(data.state)localStorage.setItem('yz_state',JSON.stringify(data.state));if(data.theme)setTheme(data.theme);if(data.checkins)localStorage.setItem('yz_checkins',JSON.stringify(data.checkins));Object.keys(data).forEach(k=>{if(k.startsWith('time_'))localStorage.setItem('yz_'+k.replace('time_','time_'),JSON.stringify(data[k]));if(k.startsWith('comment_'))localStorage.setItem('yz_'+k,data[k]);if(k.startsWith('img_'))localStorage.setItem('yz_'+k,data[k])});toast('数据已导入');location.reload()}catch(err){toast('导入失败: '+err.message)}};reader.readAsText(file)}
+function updateStatus(){document.getElementById('stat-games').textContent='游戏 '+DATA.games.length;document.getElementById('stat-novels').textContent='小说 '+DATA.novels.length;document.getElementById('stat-study').textContent='学习 '+DATA.study.length;document.getElementById('stat-movies').textContent='影音 '+DATA.movies.length;document.getElementById('stat-shelf').textContent='书架 '+shelf().length}
+function renderHome(){const now=new Date();const hr=now.getHours();const greet=(hr<5?'深夜好':hr<9?'早上好':hr<12?'上午好':hr<14?'中午好':hr<18?'下午好':'晚上好')+(nick()?','+nick():'')+'!';const dateStr=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${'日一二三四五六'[now.getDay()]}`;const seed=Number(String(now.getFullYear())+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0'));const pickG=DATA.games[seed%DATA.games.length];const pickN=DATA.novels[(seed*7)%DATA.novels.length];const pickS=DATA.study[(seed*13)%DATA.study.length];const pickM=DATA.movies[(seed*17)%DATA.movies.length];const sm=stateMap();const playing=DATA.games.map(g=>({g,st:sm['games:'+g.id]||{}})).filter(x=>x.st.status==='playing').map(x=>({it:x.g,h:Number(getTime('games',x.g.id).game)||0})).sort((a,b)=>b.h-a.h).slice(0,3);const reading=DATA.novels.map(n=>({n,st:sm['novels:'+n.id]||{}})).filter(x=>Number(x.st.chapter)>0).sort((a,b)=>(b.st.chapter||0)-(a.st.chapter||0)).slice(0,3);const rated=DATA.games.map(g=>({g,st:sm['games:'+g.id]||{}})).filter(x=>x.st.rating).sort((a,b)=>(b.st.rating||0)-(a.st.rating||0)).slice(0,5);const feed=[...DATA.games.filter(g=>g.fresh).map(g=>({m:'games',it:g})),...DATA.novels.filter(n=>n.fresh).map(n=>({m:'novels',it:n})),...DATA.movies.filter(m=>m.fresh).map(m=>({m:'movies',it:m}))].slice(0,8);const s=shelf();let gameH=0,useH=0;s.forEach(x=>{const t=getTime(x.mod,x.id);gameH+=Number(t.game)||0;useH+=Number(t.use)||0});const quote=todayQuote();const pick=(it,mod,tag)=>`<div class="pick" data-href="#/${mod}/${it.id}"><div class="pcover" style="background:${cover(it.id)}">${(effImg(mod,it.id)||it.img)?`<img src="${esc(effImg(mod,it.id)||it.img)}" alt="" onerror="this.remove()">`:''}<span class="emoji">${catEmoji(it.cat)}</span></div><div style="min-width:0"><div class="pt">${esc(it.name)}</div><div class="pm">${tag} · ${esc(it.cat)}</div></div></div>`;app.innerHTML=`<div class="hero"><div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px"><div><h1>${esc(greet)}</h1><p>${dateStr}</p></div><div style="text-align:right"><div class="quote" style="font-style:italic;color:var(--muted);max-width:320px">"${quote[0]}"</div><div style="font-size:12px;color:var(--muted);margin-top:4px">——${quote[1]}</div></div></div><div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center"><button class="btn ${todayDone()?'':'primary'}" data-act="checkin">${todayDone()?'✅ 今日已打卡':'📌 今日打卡'}</button><button class="btn" data-act="random">🎲 随机一签</button><div style="flex:1;min-width:200px"><div style="font-size:12px;color:var(--muted);margin-bottom:4px">本月打卡 ${checkins().length} 天 · 连续 ${streakDays()} 天</div>${monthHeat()}</div></div></div><div class="stats"><div class="stat"><div class="num">${DATA.games.length}</div><div class="label">游戏</div></div><div class="stat"><div class="num">${DATA.novels.length}</div><div class="label">小说</div></div><div class="stat"><div class="num">${DATA.study.length}</div><div class="label">学习</div></div><div class="stat"><div class="num">${DATA.movies.length}</div><div class="label">影音</div></div><div class="stat"><div class="num">${s.length}</div><div class="label">书架</div></div><div class="stat"><div class="num">${Math.round(gameH)}</div><div class="label">游戏时长(h)</div></div></div><div class="section-title">📋 今日推荐</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:20px">${pick(pickG,'games','今日游戏')}${pick(pickN,'novels','今日小说')}${pick(pickS,'study','今日学习')}${pick(pickM,'movies','今日影音')}</div><div class="section-title">🔥 正在游玩</div>${playing.length?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px">${playing.map(x=>pick(x.it,'games',x.h+'h')).join('')}</div>`:'<p style="color:var(--muted)">暂无正在游玩的游戏</p>'}<div class="section-title">📖 正在阅读</div>${reading.length?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px">${reading.map(x=>pick(x.n,'novels','第'+x.st.chapter+'章')).join('')}</div>`:'<p style="color:var(--muted)">暂无正在阅读的小说</p>'}<div class="section-title">⭐ 高分游戏</div>${rated.length?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px">${rated.map(x=>pick(x.g,'games',x.st.rating+'星')).join('')}</div>`:'<p style="color:var(--muted)">暂无评分记录</p>'}<div class="section-title">🆕 最新上新</div><div class="grid">${feed.map(x=>renderCard(x.it,x.m)).join('')}</div>`;bindLinks()}
+function renderCard(it,mod){const st=getState(mod,it.id);return `<div class="card" data-href="#/${mod}/${it.id}"><div class="cover" style="background:${cover(it.id)}">${(effImg(mod,it.id)||it.img)?`<img src="${esc(effImg(mod,it.id)||it.img)}" alt="" onerror="this.remove()">`:''}<span class="emoji">${catEmoji(it.cat)}</span></div><div class="content"><div class="title">${esc(it.name)}</div><div class="meta">${esc(it.cat)}${it.year?' · '+it.year:''}${it.author?' · '+esc(it.author):''}${it.platform?' · '+esc(it.platform):''}</div><div class="tags">${it.fresh?'<span class="tag accent">NEW</span>':''}${st.status?`<span class="tag" style="background:${ST[st.status]?.c||''}22;color:${ST[st.status]?.c||''}">${ST[st.status]?.t||st.status}</span>`:''}${st.rating?`<span class="tag">⭐${st.rating}</span>`:''}</div></div></div>`}
+function renderList(mod,title,items,catFilter='all'){const cats=['all',...new Set(items.map(x=>x.cat))];const sort=localStorage.getItem(`yz_sort_${mod}`)||'default';const filtered=catFilter==='all'?items:items.filter(x=>x.cat===catFilter);const sorted=[...filtered];if(sort==='name')sorted.sort((a,b)=>a.name.localeCompare(b.name));if(sort==='year')sorted.sort((a,b)=>(b.year||0)-(a.year||0));if(sort==='hot')sorted.sort((a,b)=>(b.hot||0)-(a.hot||0));app.innerHTML=`<div class="section-title">${title} (${sorted.length})</div><div class="chips">${cats.map(c=>`<span class="chip ${c===catFilter?'active':''}" data-cat="${c}">${c==='all'?'全部':c}</span>`).join('')}</div><div style="margin-bottom:12px"><label style="font-size:13px;color:var(--muted)">排序: </label><select id="sortSel" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text)"><option value="default" ${sort==='default'?'selected':''}>默认</option><option value="name" ${sort==='name'?'selected':''}>名称</option><option value="year" ${sort==='year'?'selected':''}>年份</option>${items[0]?.hot?'<option value="hot" '+(sort==='hot'?'selected':'')+'>热度</option>':''}</select></div><div class="grid">${sorted.map(it=>renderCard(it,mod)).join('')}</div>${sorted.length?'':'<div class="empty">暂无内容</div>'}`;bindLinks();document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>renderList(mod,title,items,c.dataset.cat));document.getElementById('sortSel').onchange=e=>{localStorage.setItem(`yz_sort_${mod}`,e.target.value);renderList(mod,title,items,catFilter)}}
+function renderDetail(mod,id){const arr=DATA[mod];const it=arr.find(x=>x.id===id);if(!it)return location.hash='#/home';const st=getState(mod,id);const isGame=mod==='games';const isNovel=mod==='novels';const related=arr.filter(x=>x.id!==id&&x.cat===it.cat).slice(0,4);app.innerHTML=`<div class="detail-hero"><div class="bg" style="background:${cover(it.id)}">${(effImg(mod,it.id)||it.img)?`<img src="${esc(effImg(mod,it.id)||it.img)}" alt="" onerror="this.remove()">`:''}</div><div class="info"><div class="title">${esc(it.name)}</div><div class="meta">${catEmoji(it.cat)} ${esc(it.cat)}${it.year?' · '+it.year:''}${it.platform?' · '+esc(it.platform):''}${it.author?' · '+esc(it.author):''}${it.dev?' · '+esc(it.dev):''}</div></div></div><div class="detail-body"><p>${esc(it.desc)}</p><div class="toolbar"><button class="btn ${inShelf(mod,id)?'primary':''}" data-act="shelf" data-mod="${mod}" data-id="${id}">${inShelf(mod,id)?'已加入书架':'加入书架'}</button>${it.img&&it.img.includes('steam')?`<a class="btn" href="https://store.steampowered.com/app/${it.img.match(/apps\/(\d+)/)?.[1]||''}" target="_blank">Steam页面</a>`:''}</div><h3>📊 状态追踪</h3><div class="form"><label>状态</label><select id="statusSel"><option value="">未设置</option>${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${st.status===k?'selected':''}>${v.t}</option>`).join('')}</select>${isGame?`<label>游戏时长 (小时)</label><input type="number" id="gameH" value="${getTime(mod,id).game||''}" placeholder="0">`:''}${isNovel?`<label>阅读章节</label><input type="number" id="chapter" value="${st.chapter||''}" placeholder="0">`:''}<label>我的评分</label><div class="stars" style="font-size:22px;cursor:pointer" id="starBox">${[1,2,3,4,5].map(i=>`<span data-r="${i}" style="color:${(st.rating||0)>=i?'var(--warn)':'var(--muted)'}">★</span>`).join('')}</div><label>评价</label><textarea id="comment" placeholder="写下你的评价...">${esc(getComment(mod,id))}</textarea><div style="margin-top:8px"><button class="btn primary" id="saveBtn">保存</button></div></div>${related.length?`<h3>相关推荐</h3><div class="grid">${related.map(r=>renderCard(r,mod)).join('')}</div>`:''}</div>`;bindLinks();document.getElementById('starBox').onclick=e=>{if(e.target.dataset.r){const r=+e.target.dataset.r;[...document.getElementById('starBox').children].forEach((c,i)=>c.style.color=i<r?'var(--warn)':'var(--muted)');document.getElementById('starBox').dataset.val=r}};document.getElementById('saveBtn').onclick=()=>{const ns={};ns.status=document.getElementById('statusSel').value;if(isGame){const gh=document.getElementById('gameH').value;setTime(mod,id,{...getTime(mod,id),game:gh})}if(isNovel){ns.chapter=document.getElementById('chapter').value}ns.rating=+document.getElementById('starBox').dataset.val||0;setState(mod,id,ns);setComment(mod,id,document.getElementById('comment').value);toast('已保存')}}
+function renderShelf(){const s=shelf();app.innerHTML=`<div class="section-title">📚 我的书架 (${s.length})</div>${s.length?`<div class="shelf-grid">${s.map(x=>{const it=(DATA[x.mod]||[]).find(i=>i.id===x.id);if(!it)return'';return `<div class="shelf-item" data-href="#/${x.mod}/${x.id}"><div class="thumb" style="background:${cover(it.id)}">${(effImg(x.mod,x.id)||it.img)?`<img src="${esc(effImg(x.mod,x.id)||it.img)}" alt="">`:''}</div><div class="info"><div class="name">${esc(it.name)}</div><div class="sub">${catEmoji(it.cat)} ${x.mod==='games'?'游戏':x.mod==='novels'?'小说':x.mod==='movies'?'影音':'学习'}</div></div></div>`}).join('')}</div>`:'<div class="empty">书架是空的，去添加一些内容吧</div>'}`;bindLinks()}
+function renderStats(){const sm=stateMap();const gameStates={};DATA.games.forEach(g=>{const s=(sm['games:'+g.id]||{}).status||'none';gameStates[s]=(gameStates[s]||0)+1});const novelStates={};DATA.novels.forEach(n=>{const s=(sm['novels:'+n.id]||{}).status||'none';novelStates[s]=(novelStates[s]||0)+1});const totalGameH=DATA.games.reduce((sum,g)=>sum+(Number(getTime('games',g.id).game)||0),0);const totalUseH=DATA.games.reduce((sum,g)=>sum+(Number(getTime('games',g.id).use)||0),0);const catCount={};DATA.games.forEach(g=>{catCount[g.cat]=(catCount[g.cat]||0)+1});app.innerHTML=`<div class="section-title">📊 数据统计</div><div class="grid"><div class="card"><div class="content"><div class="title">游戏状态分布</div>${Object.entries(gameStates).map(([k,v])=>`<div style="display:flex;justify-content:space-between;margin:6px 0"><span>${k==='none'?'未设置':ST[k]?.t||k}</span><span>${v}</span></div>`).join('')}</div></div><div class="card"><div class="content"><div class="title">小说状态分布</div>${Object.entries(novelStates).map(([k,v])=>`<div style="display:flex;justify-content:space-between;margin:6px 0"><span>${k==='none'?'未设置':ST[k]?.t||k}</span><span>${v}</span></div>`).join('')}</div></div><div class="card"><div class="content"><div class="title">总时长</div><div style="font-size:32px;font-weight:800;color:var(--accent)">${Math.round(totalGameH)}<span style="font-size:14px;color:var(--muted)">h</span></div><div style="color:var(--muted)">游戏时长</div><div style="margin-top:12px;font-size:24px;font-weight:700">${Math.round(totalUseH)}<span style="font-size:14px;color:var(--muted)">h</span></div><div style="color:var(--muted)">使用时长</div></div></div><div class="card"><div class="content"><div class="title">游戏分类</div>${Object.entries(catCount).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div style="display:flex;justify-content:space-between;margin:6px 0"><span>${k}</span><span>${v}</span></div>`).join('')}</div></div></div>`}
+function renderDIY(){const items=JSON.parse(localStorage.getItem('yz_diy')||'[]');app.innerHTML=`<div class="section-title">🔧 DIY专区</div><div class="toolbar"><button class="btn primary" data-act="adddiy">添加项目</button></div><div class="diy-grid">${items.map(d=>`<div class="diy-card"><div class="title">${esc(d.name)}</div><div class="url">${esc(d.url)}</div><div class="actions"><button class="btn" data-act="opendiy" data-url="${esc(d.url)}">打开</button><button class="btn" data-act="deldiy" data-id="${d.id}">删除</button></div></div>`).join('')}</div>${items.length?'':'<div class="empty">暂无DIY项目</div>'}`;bindLinks()}
+function renderSearch(q){const term=q.toLowerCase();const results=[];DATA.games.filter(g=>g.name.toLowerCase().includes(term)||g.cat.toLowerCase().includes(term)).forEach(g=>results.push({mod:'games',it:g}));DATA.novels.filter(n=>n.name.toLowerCase().includes(term)||n.cat.toLowerCase().includes(term)||n.author?.toLowerCase().includes(term)).forEach(n=>results.push({mod:'novels',it:n}));DATA.study.filter(s=>s.name.toLowerCase().includes(term)||s.cat.toLowerCase().includes(term)).forEach(s=>results.push({mod:'study',it:s}));DATA.movies.filter(m=>m.name.toLowerCase().includes(term)||m.cat.toLowerCase().includes(term)).forEach(m=>results.push({mod:'movies',it:m}));const byMod={};results.forEach(r=>{byMod[r.mod]=(byMod[r.mod]||[]).r});app.innerHTML=`<div class="section-title">"${esc(q)}" 的搜索结果 (${results.length})</div>${results.length?Object.entries(byMod).map(([mod,arr])=>`<h3 style="color:var(--muted);font-size:14px;margin:16px 0 8px">${mod==='games'?'游戏':mod==='novels'?'小说':mod==='movies'?'影音':'学习'} (${arr.length})</h3><div class="grid">${arr.map(x=>renderCard(x.it,x.mod)).join('')}</div>`).join(''):'<div class="empty">没有找到相关内容</div>'}`;bindLinks()}
+function bindLinks(){document.querySelectorAll('[data-href]').forEach(el=>el.onclick=()=>location.hash=el.dataset.href)}
+function router(){const h=location.hash.slice(1)||'/home';const [path]=h.split('?');updateStatus();document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));const active=document.querySelector(`.nav a[href="#${path}"]`);if(active)active.classList.add('active');if(path==='/home'||path==='')renderHome();else if(path==='/games')renderList('games','游戏库',DATA.games);else if(path==='/novels')renderList('novels','小说库',DATA.novels);else if(path==='/study')renderList('study','学习资料',DATA.study);else if(path==='/movies')renderList('movies','影音收藏',DATA.movies);else if(path==='/shelf')renderShelf();else if(path==='/stats')renderStats();else if(path==='/diy')renderDIY();else if(path.startsWith('/search')){const q=new URLSearchParams(location.hash.split('?')[1]||'').get('q')||'';if(q)renderSearch(q);else renderHome()}else{const m=path.match(/^\/(games|novels|study|movies)\/(.+)$/);if(m)renderDetail(m[1],m[2]);else renderHome()}}
+function init(){setTheme(getTheme());updateStatus();router();window.addEventListener('hashchange',router);document.getElementById('themeBtn').onclick=()=>setTheme(getTheme()==='dark'?'light':'dark');document.getElementById('exportBtn').onclick=exportData;document.getElementById('importBtn').onclick=()=>document.getElementById('fileInput').click();document.getElementById('fileInput').onchange=e=>{if(e.target.files[0])importData(e.target.files[0])};document.getElementById('updateBtn').onclick=()=>{toast('已是最新版本')};document.getElementById('q').onkeydown=e=>{if(e.key==='Enter'){const v=e.target.value.trim();if(v)location.hash=`#/search?q=${encodeURIComponent(v)}`}};document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const act=t.dataset.act;if(act==='checkin'){addCheckin();toast('打卡成功！');renderHome()}if(act==='random'){const all=[...DATA.games.map(g=>({m:'games',it:g})),...DATA.novels.map(n=>({m:'novels',it:n})),...DATA.study.map(s=>({m:'study',it:s})),...DATA.movies.map(m=>({m:'movies',it:m}))];const pick=all[Math.floor(Math.random()*all.length)];if(pick)location.hash=`#/${pick.m}/${pick.it.id}`}if(act==='shelf'){toggleShelf(t.dataset.mod,t.dataset.id);t.textContent=inShelf(t.dataset.mod,t.dataset.id)?'已加入书架':'加入书架';t.classList.toggle('primary')}if(act==='adddiy'){const name=prompt('名称:');const url=prompt('链接:');if(name&&url){const items=JSON.parse(localStorage.getItem('yz_diy')||'[]');items.push({id:'d'+Date.now(),name,url});localStorage.setItem('yz_diy',JSON.stringify(items));renderDIY()}}if(act==='opendiy')window.open(t.dataset.url,'_blank');if(act==='deldiy'){const items=JSON.parse(localStorage.getItem('yz_diy')||'[]');const filtered=items.filter(x=>x.id!==t.dataset.id);localStorage.setItem('yz_diy',JSON.stringify(filtered));renderDIY()}});document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='k'){e.preventDefault();document.getElementById('q').focus()}if(e.key==='Escape'){const m=document.getElementById('modal');if(m.classList.contains('active'))m.classList.remove('active')}});if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})}
+init();
 </script>
 </body>
 </html>

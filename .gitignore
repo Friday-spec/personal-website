@@ -1,9 +1,14 @@
 _*.log
 _*.err
 _check.js
-_dom_home.html
-_shot_*.png
+_dom_*.html
+_shot*.png
 _edge_tmp*
+_edge_shot*
+_edge_*/
+_shots*/
+_build/
+secrets/
 
 start-site.bat
 start-site.ps1

@@ -1,21 +1,22 @@
 {
-  "updated": "2026-08-18",
-  "note": "每日上新源。部署网站后，站点打开/点「更新内容」会自动拉取本文件，合并新游戏/小说；每天自动同步一次。要更新内容，只需改这个文件（或接后端定时生成）。",
+  "updated": "2026-08-19",
   "games": [
-    {"id":"deathstranding","name":"死亡搁浅2","cat":"开放世界","year":"2025","platform":"PC/PS5","dev":"小岛工作室","img":null,"fresh":true,
-     "desc":"小岛秀夫新作，连接世界、送货冒险的开放世界动作，PC 版 2025-12 上线、主机版 2026-02。"},
-    {"id":"codevein2","name":"噬血代码2","cat":"动作","year":"2026","platform":"PC/主机","dev":"万代南梦宫","img":null,"fresh":true,
-     "desc":"万代吸血鬼题材硬核动作 RPG 续作，2026-01-30 发售。"},
-    {"id":"sevenmortal","name":"七大罪：起源","cat":"MMO","year":"2026","platform":"PC/主机/移动","dev":"Netmarble","img":null,"fresh":true,
-     "desc":"《七大罪》IP 开放世界 MMO，2026-01-28 上线。"},
-    {"id":"zenithguard","name":"巅峰守卫","cat":"射击","year":"2026","platform":"PC/主机","dev":"--","img":null,"fresh":true,
-     "desc":"2026-01-26 发售的国产射击新作。"}
+    { "id": "silksong", "name": "丝之歌", "cat": "动作", "year": "2026", "platform": "PC/主机", "dev": "Team Cherry", "img": null, "url": "https://www.silksong.com", "fresh": true, "desc": "《空洞骑士》续作，大黄蜂的丝线之旅，跳票多年的期待之作，2026 年发售。" },
+    { "id": "mhwilds", "name": "怪物猎人：荒野", "cat": "动作", "year": "2026", "platform": "PC/主机", "dev": "卡普空", "img": null, "url": "https://www.monsterhunter.com", "fresh": true, "desc": "卡普空狩猎新作，开放荒野生态与集中模式，系列新巅峰。" },
+    { "id": "sango", "name": "真三国无双：起源", "cat": "动作", "year": "2025", "platform": "PC/PS5", "dev": "光荣特库摩", "img": null, "url": "https://www.gamecity.ne.jp/smusou/origins/", "fresh": true, "desc": "无双系列革新作，万人同屏战场与全新主角视角。" },
+    { "id": "inzoi", "name": "InZOI 虚拟人生", "cat": "模拟经营", "year": "2025", "platform": "PC", "dev": "Krafton", "img": null, "url": "https://www.inzoi.com", "fresh": true, "desc": "虚幻5 高保真生活模拟，捏人与建造自由度拉满。" }
   ],
   "novels": [
-    {"id":"moqiuxian","name":"没钱修什么仙（续）","cat":"仙侠","author":"熊狼狗","year":"2026","status":"连载","hot":"🔥 持续高热","fresh":true,
-     "desc":"熊狼狗仙侠爆款持续更新，现代设备混入修仙世界的轻松爽文。"},
-    {"id":"xueqiu","name":"雪球","cat":"都市","author":"--","year":"2026","status":"连载","hot":"🔥 新书","fresh":true,
-     "desc":"2026 都市新晋热门作品（示例上新条目）。"}
+    { "id": "huangjin", "name": "黄金黎明", "cat": "玄幻", "author": "--", "year": "2026", "status": "连载", "hot": "🔥 新书榜", "fresh": true, "desc": "2026 玄幻新书，黎明降临与黄金时代的史诗。" },
+    { "id": "qiankun", "name": "乾坤之主", "cat": "仙侠", "author": "--", "year": "2026", "status": "连载", "hot": "🔥 新书榜", "fresh": true, "desc": "2026 仙侠新作，少年掌乾坤的崛起之路。" },
+    { "id": "xingluo", "name": "星落之城", "cat": "科幻", "author": "--", "year": "2026", "status": "连载", "hot": "🔥 新书榜", "fresh": true, "desc": "2026 科幻新书，群星坠落之城的求生与觉醒。" }
   ],
-  "study": []
+  "study": [
+    { "id": "deepseek", "name": "DeepSeek 入门指南", "cat": "课程", "sub": "text", "fresh": true, "url": "https://www.deepseek.com", "desc": "AI 大模型使用入门：提示词技巧与效率工作流。" },
+    { "id": "aiart", "name": "AI 绘画教程合集", "cat": "课程", "sub": "video", "fresh": true, "url": "https://www.bilibili.com", "desc": "Midjourney / Stable Diffusion 从入门到出图。" }
+  ],
+  "movies": [
+    { "id": "xinhai", "name": "新海诚 2026 新作", "cat": "动画", "year": "2026", "platform": "电影", "dev": "新海诚", "fresh": true, "url": "https://movie.douban.com", "desc": "新海诚全新动画电影，延续细腻画风与情感叙事。" },
+    { "id": "gundam", "name": "机动战士高达 新剧场版", "cat": "动画", "year": "2026", "platform": "电影", "dev": "万代南梦宫", "fresh": true, "url": "https://movie.douban.com", "desc": "高达系列 2026 全新剧场版，UC 宇宙再启新篇。" }
+  ]
 }
