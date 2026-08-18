@@ -1,0 +1,6 @@
+_*.log
+_*.err
+_check.js
+_dom_home.html
+_shot_*.png
+_edge_tmp*

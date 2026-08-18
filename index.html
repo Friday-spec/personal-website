@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="我的小站：游戏 · 小说 · 学习资料的个人收藏与进度管理" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>" />
+<title>我的小站</title>
+<style>
+  :root{
+    --bg:#0d0f14; --panel:#141821; --panel2:#1b2230; --fg:#eceef2; --muted:#9aa3af;
+    --accent:#5b8cff; --accent2:#36d6c3; --line:#262d3a; --radius:16px; --hot:#ff5a5a;
+  }
+  :root[data-theme="light"]{
+    --bg:#f4f6fa; --panel:#ffffff; --panel2:#eef1f6; --fg:#1a2029; --muted:#5c6672;
+    --line:#dde3ec; --accent:#3b6cf5; --accent2:#0aa893; --hot:#e5484d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--fg);line-height:1.6}
+  a{color:var(--accent);text-decoration:none}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  main>*{animation:fadeUp .35s ease both}
+  .card,.rankrow,.pick,.stat,.srow,.pickrow>*{animation:fadeUp .35s ease both}
+
+  .topbar{position:sticky;top:0;z-index:30;background:rgba(13,15,20,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  :root[data-theme="light"] .topbar{background:rgba(255,255,255,.92)}
+  .topbar .row1{display:flex;align-items:center;gap:10px;padding:10px 18px;flex-wrap:wrap}
+  .brand{font-weight:800;letter-spacing:.5px;font-size:17px;cursor:pointer}
+  .brand small{color:var(--muted);font-weight:500;margin-left:6px;font-size:12px}
+  .searchbox{background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--fg);
+    padding:7px 12px;font-size:13px;width:200px;outline:none;transition:border-color .15s}
+  .searchbox:focus{border-color:var(--accent)}
+  .nav{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+  .nav a{padding:7px 13px;border-radius:10px;color:var(--muted);font-size:14px;border:1px solid transparent}
+  .nav a:hover{color:var(--fg)}
+  .nav a.active{background:var(--panel2);color:var(--fg);border-color:var(--line)}
+  .nav a .badge{background:var(--accent);color:#0b0d12;border-radius:999px;font-size:11px;padding:0 6px;margin-left:4px;font-weight:700}
+  .updbtn,.iconbtn{background:var(--panel2);border:1px solid var(--line);color:var(--fg);border-radius:10px;
+    padding:7px 12px;cursor:pointer;font-size:13px}
+  .updbtn:hover,.iconbtn:hover{border-color:var(--accent)}
+  .statusbar{display:flex;align-items:center;gap:14px;padding:4px 18px 8px;color:var(--muted);font-size:12px;flex-wrap:wrap}
+  .statusbar select{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:3px 6px;font-size:12px}
+
+  main{max-width:1180px;margin:0 auto;padding:24px 18px 70px}
+  .crumbs{color:var(--muted);font-size:13px;margin:0 0 14px}
+  .crumbs a{color:var(--muted)}
+  h1.page{font-size:26px;margin:0 0 4px}
+  .page-sub{color:var(--muted);margin:0 0 18px;font-size:14px}
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+  .chip{padding:6px 13px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--muted);cursor:pointer;font-size:13px}
+  .chip.on{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#0b0d12;border:none;font-weight:700}
+
+  /* 通用封面 */
+  .cover{position:relative;overflow:hidden;border-radius:14px 14px 0 0;aspect-ratio:3/4;
+    display:flex;align-items:center;justify-content:center}
+  .cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .cover .emoji{font-size:46px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));z-index:1}
+  .cover .cv-name{position:absolute;left:10px;right:10px;bottom:10px;font-size:15px;font-weight:700;z-index:2;
+    text-shadow:0 2px 8px rgba(0,0,0,.85);line-height:1.25}
+  .cover .badge-top{position:absolute;top:8px;left:8px;z-index:3;background:rgba(0,0,0,.6);border:1px solid var(--line);
+    color:#fff;font-size:11px;padding:2px 8px;border-radius:8px}
+  .cover .fresh{position:absolute;top:8px;right:8px;z-index:3;background:linear-gradient(90deg,#ff7a45,#ff5a5a);
+    color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:8px}
+
+  /* 状态徽章 */
+  .stbadge{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;font-weight:700;vertical-align:middle}
+  .st-playing{background:rgba(54,214,195,.15);color:var(--accent2);border:1px solid var(--accent2)}
+  .st-wish{background:rgba(91,140,255,.15);color:var(--accent);border:1px solid var(--accent)}
+  .st-done{background:rgba(255,210,61,.15);color:#ffd23d;border:1px solid #ffd23d}
+  .st-drop{background:rgba(154,163,175,.15);color:var(--muted);border:1px solid var(--line)}
+  .st-reading{background:rgba(54,214,195,.15);color:var(--accent2);border:1px solid var(--accent2)}
+  .st-learning{background:rgba(54,214,195,.15);color:var(--accent2);border:1px solid var(--accent2)}
+  .st-finished{background:rgba(255,210,61,.15);color:#ffd23d;border:1px solid #ffd23d}
+  .stars{display:inline-flex;gap:2px;vertical-align:middle}
+  .star{cursor:pointer;color:var(--line);font-size:20px;line-height:1;transition:transform .1s}
+  .star:hover{transform:scale(1.2)}
+  .star.on{color:#ffd23d}
+
+  /* 游戏卡片网格（IGN/游民风格） */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;
+    transition:transform .12s,border-color .12s;display:flex;flex-direction:column}
+  .card:hover{transform:translateY(-4px);border-color:var(--accent)}
+  .card .meta{padding:10px 12px 12px}
+  .card .meta .nm{font-weight:700;font-size:15px}
+  .card .meta .ct{color:var(--accent2);font-size:12px;margin-top:2px}
+  .card .meta .stline{margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+
+  /* 游戏焦点大图 */
+  .hero{position:relative;border-radius:18px;overflow:hidden;margin-bottom:26px;min-height:240px;
+    display:flex;align-items:flex-end;background:#000}
+  .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55}
+  .hero .hgrad{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.85),rgba(0,0,0,.1))}
+  .hero .hcontent{position:relative;z-index:2;padding:26px}
+  .hero .hcontent .ht{font-size:30px;font-weight:800;margin:0}
+  .hero .hcontent .hm{color:#dfe3ea;margin:6px 0 12px;font-size:14px}
+  :root[data-theme="light"] .hero .hcontent .hm{color:#e8ecf2}
+  .hero .hcontent .htags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .hero .hcontent .htags span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);
+    padding:3px 10px;border-radius:999px;font-size:12px}
+
+  /* 小说榜单（起点风格） */
+  .ranklist{display:flex;flex-direction:column;gap:12px}
+  .rankrow{display:flex;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:12px;cursor:pointer;transition:.12s}
+  .rankrow:hover{border-color:var(--accent);transform:translateX(2px)}
+  .rankrow .rk{font-size:22px;font-weight:800;color:var(--muted);width:34px;text-align:center;flex:0 0 34px;
+    align-self:center}
+  .rankrow:nth-child(1) .rk{color:#ff5a5a}
+  .rankrow:nth-child(2) .rk{color:#ff9a3d}
+  .rankrow:nth-child(3) .rk{color:#ffd23d}
+  .bcover{position:relative;width:84px;height:112px;flex:0 0 84px;border-radius:8px;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;background:#222}
+  .bcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .bcover .emoji{font-size:30px;z-index:1}
+  .bcover .cv-name{position:absolute;left:6px;right:6px;bottom:6px;font-size:13px;font-weight:700;z-index:2;
+    text-shadow:0 2px 6px #000;line-height:1.2}
+  .binfo{flex:1;min-width:0}
+  .binfo .bt{font-size:17px;font-weight:700}
+  .binfo .bm{color:var(--muted);font-size:13px;margin:2px 0 6px}
+  .binfo .bd{color:#c7cdd6;font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  :root[data-theme="light"] .binfo .bd{color:#3a4450}
+  .binfo .btags{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .htag{font-size:12px;color:var(--hot)}
+  .statag{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--accent2)}
+
+  /* 详情 */
+  .detail{display:grid;grid-template-columns:320px 1fr;gap:28px}
+  @media(max-width:780px){.detail{grid-template-columns:1fr}.detail .dcover{position:relative!important;top:0!important}}
+  .detail .dcover{border-radius:16px;overflow:hidden;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;
+    position:sticky;top:120px;background:#000}
+  .detail .dcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .detail .dcover .emoji{font-size:60px;z-index:1}
+  .detail .dcover .cv-name{position:absolute;left:14px;right:14px;bottom:14px;font-size:22px;font-weight:800;z-index:2;text-shadow:0 2px 8px #000}
+  .detail h1{margin:0 0 6px;font-size:28px}
+  .detail .tags{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+  .tag{font-size:12px;padding:3px 10px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--accent2)}
+  .detail .desc{color:#cdd3db;font-size:15px;white-space:pre-wrap}
+  :root[data-theme="light"] .detail .desc{color:#333b46}
+  .block{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:18px}
+  .block h3{margin:0 0 10px;font-size:15px;color:var(--muted);font-weight:700;letter-spacing:.5px}
+  .block textarea,.block input,.stsel{width:100%;background:var(--bg);color:var(--fg);border:1px solid var(--line);
+    border-radius:10px;padding:9px;font-family:inherit;font-size:14px}
+  .stsel{width:auto;min-width:160px}
+  .block textarea{min-height:70px;resize:vertical}
+  .block textarea:focus,.block input:focus,.stsel:focus{border-color:var(--accent);outline:none}
+  .time-row{display:flex;gap:12px;flex-wrap:wrap}
+  .time-row label{flex:1;min-width:130px;font-size:13px;color:var(--muted)}
+  .time-row input{margin-top:6px}
+  .state-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .state-row>span{font-size:13px;color:var(--muted)}
+  .btn{display:inline-block;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#0b0d12;
+    font-weight:700;padding:9px 16px;border-radius:10px;font-size:14px;border:none;cursor:pointer}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)}
+  .btn.ghost:hover{border-color:var(--accent)}
+  .btn.small{padding:6px 12px;font-size:13px}
+  .row-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .rel{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+  .rel .mini{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer}
+  .rel .mini:hover{border-color:var(--accent)}
+
+  /* 首页仪表盘 */
+  .greet{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .greet h1{font-size:28px;margin:0}
+  .greet .date{color:var(--muted);font-size:14px}
+  .sec{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:18px}
+  .sec h3{margin:0 0 14px;font-size:15px;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .sec h3 .more{margin-left:auto;font-size:12px;font-weight:500;color:var(--accent);cursor:pointer}
+  .pickrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+  .pick{display:flex;gap:12px;align-items:center;background:var(--panel2);border:1px solid var(--line);
+    border-radius:12px;padding:10px;cursor:pointer;transition:.12s}
+  .pick:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .pick .pcover{width:52px;height:70px;flex:0 0 52px;border-radius:8px;overflow:hidden;display:flex;
+    align-items:center;justify-content:center;background:#222;position:relative}
+  .pick .pcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .pick .pcover .emoji{font-size:22px;z-index:1}
+  .pick .pt{font-size:14px;font-weight:700}
+  .pick .pm{color:var(--muted);font-size:12px;margin-top:2px}
+  .rankline{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);cursor:pointer}
+  .rankline:last-child{border-bottom:none}
+  .rankline:hover .rn{color:var(--accent)}
+  .rankline .ri{width:22px;text-align:center;font-weight:800;color:var(--muted);font-size:15px}
+  .rankline[data-i="0"] .ri{color:var(--hot)}
+  .rankline[data-i="1"] .ri{color:#ff9a3d}
+  .rankline[data-i="2"] .ri{color:#ffd23d}
+  .rankline .rn{font-weight:600;font-size:14px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rankline .rm{color:var(--muted);font-size:12px}
+  .feedline{display:flex;gap:8px;flex-wrap:wrap}
+  .feedline a{padding:5px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;font-size:13px;color:var(--fg)}
+  .feedline a:hover{border-color:var(--accent)}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:860px){.cols{grid-template-columns:1fr}}
+
+  .mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:10px}
+  .modcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;cursor:pointer;transition:.12s}
+  .modcard:hover{border-color:var(--accent);transform:translateY(-3px)}
+  .modcard .ico{font-size:34px}
+  .modcard h3{margin:10px 0 4px;font-size:19px}
+  .modcard p{color:var(--muted);font-size:13px;margin:0}
+  .stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px;flex:1;min-width:110px}
+  .stat b{font-size:22px;display:block}
+  .stat span{color:var(--muted);font-size:12px}
+  .newfeed{background:linear-gradient(90deg,rgba(91,140,255,.12),rgba(54,214,195,.12));border:1px solid var(--line);
+    border-radius:14px;padding:14px 16px;margin-bottom:18px;font-size:14px}
+  .newfeed b{color:var(--accent2)}
+
+  /* 搜索 */
+  .searchgrp{margin-top:22px}
+  .searchgrp h3{font-size:14px;color:var(--muted);margin:0 0 10px}
+  .srow{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;padding:10px 14px;cursor:pointer;margin-top:8px;transition:.12s}
+  .srow:hover{border-color:var(--accent)}
+  .srow .scover{width:40px;height:54px;flex:0 0 40px;border-radius:6px;overflow:hidden;display:flex;align-items:center;
+    justify-content:center;background:#222;position:relative}
+  .srow .scover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .srow .scover .emoji{font-size:18px;z-index:1}
+  .srow .sname{font-weight:700;font-size:14px}
+  .srow .smeta{color:var(--muted);font-size:12px;margin-left:auto}
+
+  footer{text-align:center;color:var(--muted);padding:30px 20px;border-top:1px solid var(--line);font-size:13px}
+  .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(10px);background:var(--panel2);
+    border:1px solid var(--accent);color:var(--fg);padding:10px 18px;border-radius:12px;font-size:14px;
+    opacity:0;transition:opacity .25s,transform .25s;z-index:50;pointer-events:none;max-width:90vw}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .empty{color:var(--muted);text-align:center;padding:40px;border:1px dashed var(--line);border-radius:14px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="row1">
+    <span class="brand" onclick="location.hash='#/'">我的小站<small id="year"></small></span>
+    <input class="searchbox" id="searchInput" placeholder="🔍 搜索游戏 / 小说 / 资料…">
+    <nav class="nav" id="nav">
+      <a href="#/games">🎮 游戏</a>
+      <a href="#/novels">📖 小说</a>
+      <a href="#/study">📚 学习资料</a>
+      <a href="#/shelf">📑 书架<span class="badge" id="shelfBadge">0</span></a>
+      <a href="#/diy">🧩 DIY</a>
+    </nav>
+    <button class="updbtn" data-act="update">🔄 更新</button>
+    <button class="iconbtn" id="themeBtn" title="切换主题">☀️</button>
+    <button class="iconbtn" data-act="export" title="导出数据备份">⬇️</button>
+    <button class="iconbtn" data-act="import" title="导入备份">⬆️</button>
+  </div>
+  <div class="statusbar">
+    <span id="lastupdate">最后更新：—</span>
+    <span>自动更新：
+      <select id="automin">
+        <option value="0">关闭</option>
+        <option value="15">每15分钟</option>
+        <option value="30" selected>每30分钟</option>
+        <option value="60">每1小时</option>
+        <option value="1440">每天</option>
+      </select>
+    </span>
+    <span>数据存于本机浏览器，建议定期 ⬇️ 导出备份</span>
+  </div>
+</div>
+
+<main id="app"></main>
+<footer>© <span id="year2"></span> 我的小站 · 由 QClaw 生成 · 游戏封面来自 Steam 官方 CDN（部署后可每日同步上新）</footer>
+<div class="toast" id="toast"></div>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+<input type="file" id="coverFile" accept="image/*" hidden>
+
+<script>
+const $=s=>document.querySelector(s);
+const app=$('#app');
+const MODS={games:{name:'游戏',icon:'🎮'},novels:{name:'小说',icon:'📖'},study:{name:'学习资料',icon:'📚'},diy:{name:'DIY',icon:'🧩'}};
+const STEAM=id=>`https://cdn.cloudflare.steamstatic.com/steam/apps/${id}/library_600x900.jpg`;
+
+/* ============ 数据（整理至 2026-08；fresh=当年新作/热门） ============ */
+const DATA={
+ games:[
+  {id:'genshin',url:'https://ys.mihoyo.com',name:'原神',cat:'开放世界',year:'2020',platform:'PC/PS/移动',dev:'米哈游',img:null,fresh:false,
+   desc:'米哈游出品的开放世界冒险 RPG。提瓦特大陆自由探索，元素反应战斗与角色收集，版本持续更新、地图不断扩张。'},
+  {id:'zzz',url:'https://zzz.mihoyo.com',name:'绝区零',cat:'二次元',year:'2024',platform:'PC/PS/移动',dev:'米哈游',img:null,fresh:false,
+   desc:'米哈游都市潮酷动作 RPG，爽快打击感与潮酷美术，与异环同厂新作。'},
+  {id:'hsr',url:'https://sr.mihoyo.com',name:'崩坏：星穹铁道',cat:'二次元',year:'2023',platform:'PC/移动',dev:'米哈游',img:null,fresh:false,
+   desc:'米哈游银河冒险策略 RPG，回合制战斗 + 沉浸式剧情演出。'},
+  {id:'wzry',url:'https://pvp.qq.com',name:'王者荣耀',cat:'MOBA',year:'2015',platform:'iOS/安卓',dev:'腾讯天美',img:null,fresh:false,
+   desc:'腾讯天美国民级 5v5 手游 MOBA，快节奏对战、英雄多样、社交属性强。'},
+  {id:'lol',url:'https://lol.qq.com',name:'英雄联盟',cat:'MOBA',year:'2009',platform:'PC',dev:'腾讯 Riot',img:null,fresh:false,
+   desc:'Riot/腾讯经典 PC 端 MOBA，全球最成熟的电竞赛事生态之一。'},
+  {id:'dota2',url:'https://www.dota2.com',name:'DOTA2',cat:'MOBA',year:'2013',platform:'PC',dev:'Valve',img:STEAM(570),fresh:false,
+   desc:'Valve 出品的高端 MOBA，深度策略与 TI 国际邀请赛。'},
+  {id:'naraka',url:'https://www.naraka.game',name:'永劫无间',cat:'武侠',year:'2021',platform:'PC/主机',dev:'24 Entertainment',img:STEAM(1203220),fresh:false,
+   desc:'国产武侠 60 人竞技，飞索博弈 + 近战拼刀，IP 影响力大。'},
+  {id:'pubg',url:'https://pubg.com',name:'绝地求生 PUBG',cat:'射击',year:'2017',platform:'PC/主机/手游',dev:'Krafton',img:STEAM(578080),fresh:false,
+   desc:'战术竞技射击开创者，百人吃鸡、拟真枪械。'},
+  {id:'valorant',url:'https://playvalorant.com',name:'无畏契约 VALORANT',cat:'射击',year:'2020',platform:'PC',dev:'Riot',img:null,fresh:false,
+   desc:'Riot 英雄技能 + 精准射击的 5v5 战术 FPS，电竞新势力。'},
+  {id:'mc',url:'https://www.minecraft.net/zh-hans',name:'我的世界',cat:'沙盒',year:'2011',platform:'全平台',dev:'Mojang',img:STEAM(241750),fresh:false,
+   desc:'Mojang 像素沙盒建造生存，红石电路与模组生态无限。'},
+  {id:'eldenring',url:'https://eldenring.bandainamcoent.eu',name:'艾尔登法环',cat:'魂系',year:'2022',platform:'PC/主机',dev:'万代/FromSoftware',img:STEAM(1245620),fresh:false,
+   desc:'FromSoftware/万代开放世界魂系动作 RPG，高难度探索与 boss 战。'},
+  {id:'wukong',url:'https://www.blackmythwukong.com',name:'黑神话：悟空',cat:'动作',year:'2024',platform:'PC/主机',dev:'游戏科学',img:STEAM(2358720),fresh:false,
+   desc:'游戏科学 2024 国产 3A 动作游戏，西游记题材写实美术与硬核战斗。'},
+  {id:'totk',url:'https://www.zelda.com/tears-of-the-kingdom/',name:'塞尔达传说：王国之泪',cat:'开放世界',year:'2023',platform:'Switch',dev:'任天堂',img:null,fresh:false,
+   desc:'任天堂海拉鲁开放世界冒险，"究极手"等能力带来自由建造与解谜。'},
+  {id:'nioh3',url:'https://www.gamecity.ne.jp/nioh3',name:'仁王3',cat:'动作',year:'2026',platform:'PC/PS5',dev:'光荣特库摩',img:STEAM(3681010),fresh:true,
+   desc:'光荣特库摩 2026-02-06 发售的黑暗战国动作 RPG，可切换"武士/忍者"双形态，开放地图。首个 DLC《庆安地狱变》2026-08-19 上线。'},
+  {id:'szerol',url:'https://www.s-games.com.cn/',name:'影之刃零',cat:'动作',year:'2026',platform:'PC/PS5',dev:'灵游坊',img:null,fresh:true,
+   desc:'灵游坊 UE5 暗黑武侠动作，Steam 愿望单 2026 热度前列，2026 年 9 月发售。'},
+  {id:'gta6',url:'https://www.rockstargames.com/VI',name:'GTA 6',cat:'开放世界',year:'2026',platform:'PC/主机',dev:'Rockstar',img:null,fresh:true,
+   desc:'Rockstar 开放世界史诗续作，2026 年底备受瞩目的发售大作。'},
+  {id:'wow',url:'https://worldofwarcraft.blizzard.com',name:'魔兽世界',cat:'MMO',year:'2004',platform:'PC',dev:'暴雪',img:null,fresh:false,
+   desc:'暴雪经典 MMORPG，20 年长线运营的网游常青树。'},
+  {id:'nh',url:'https://n.163.com',name:'逆水寒',cat:'MMO',year:'2018',platform:'PC/手游',dev:'网易',img:null,fresh:false,
+   desc:'网易国风开放世界 3D 武侠 MMO，画面细腻、玩法丰富。'},
+  {id:'ymzx',url:'https://ymzx.qq.com',name:'元梦之星',cat:'派对',year:'2023',platform:'iOS/安卓',dev:'腾讯',img:null,fresh:false,
+   desc:'腾讯正版合家欢派对手游，乐园建造 + 多人小游戏。'},
+  {id:'lovesky',url:'https://lovestory.infoldgames.com',name:'恋与深空',cat:'乙女',year:'2024',platform:'iOS/安卓',dev:'叠纸',img:null,fresh:true,
+   desc:'叠纸 2024 女性向 3D 恋爱冒险，2026 热度持续走高。'}
+ ],
+ novels:[
+  {id:'xuanjian',name:'玄鉴仙族',cat:'仙侠',author:'季越人',year:'2026',status:'连载',hot:'🔥 起点销冠',fresh:true,
+   desc:'2026 起点销冠。陆江仙残魂附铜镜，落修仙世界，被小家族拾得传仙法，家族修仙种田群像，无系统不圣母。'},
+  {id:'qingshan',name:'青山',cat:'玄幻',author:'会说话的肘子',year:'2026',status:'连载',hot:'🔥 高人气',fresh:true,
+   desc:'肘子新作。当今名利已斩天下九分侠气，诸位，这是天下最后一分侠气的故事。'},
+  {id:'laoshi',name:'捞尸人',cat:'都市',author:'纯洁滴小龙',year:'2026',status:'连载',hot:'🔥 月票榜首',fresh:true,
+   desc:'2026 人气榜前列。人知鬼恐怖，鬼晓人心毒，一本传统灵异小说。'},
+  {id:'yewujiang',name:'夜无疆',cat:'玄幻',author:'辰东',year:'2026',status:'连载',hot:'🔥 月票 Top5',fresh:true,
+   desc:'辰东新作。那一天太阳落下再也没有升起……东方玄幻，世界观宏大。'},
+  {id:'meiqian',name:'没钱修什么仙？',cat:'仙侠',author:'熊狼狗',year:'2026',status:'连载',hot:'🔥 热门',fresh:true,
+   desc:'少年被强者反复侮辱，神秘老者传功，现代设备混入修仙的轻松爽文。'},
+  {id:'guimi',name:'诡秘之主',cat:'玄幻',author:'爱潜水的乌贼',year:'2020',status:'完本',hot:'🌟 神作',fresh:false,
+   desc:'克苏鲁风蒸汽朋克，序列途径升级 + 悬疑叙事，男频神作（已完本，动画热播）。'},
+  {id:'xinghe',name:'星河之主',cat:'科幻',author:'--',year:'2026',status:'连载',hot:'🔥 科幻前列',fresh:true,
+   desc:'2026 起点科幻人气前列，星际文明题材。'},
+  {id:'yishentong',name:'以神通之名',cat:'仙侠',author:'--',year:'2026',status:'连载',hot:'🔥 热门',fresh:true,
+   desc:'2026 仙侠高人气作品。'},
+  {id:'yibaisi',name:'1984：从破产川菜馆开始',cat:'都市',author:'--',year:'2026',status:'连载',hot:'🔥 创业热',fresh:true,
+   desc:'2026 都市创业题材热作。'},
+  {id:'qiangshen',name:'我，枪神！',cat:'游戏',author:'--',year:'2026',status:'连载',hot:'🔥 电竞',fresh:true,
+   desc:'2026 游戏竞技题材热门。'},
+  {id:'xianmen',name:'让仙门再次伟大',cat:'仙侠',author:'--',year:'2026',status:'连载',hot:'🔥 热门',fresh:true,
+   desc:'2026 仙侠热门新作。'},
+  {id:'wudao',name:'苟在武道世界成圣',cat:'武道',author:'--',year:'2026',status:'连载',hot:'🔥 种田流',fresh:true,
+   desc:'2026 武道种田流热门。'},
+  {id:'jianzhu',name:'剑烛大荒',cat:'玄幻',author:'--',year:'2026',status:'连载',hot:'🔥 月票在榜',fresh:true,
+   desc:'2026 玄幻人气前列。'},
+  {id:'yongye',name:'我在永夜打造庇护所',cat:'末世',author:'--',year:'2026',status:'连载',hot:'🔥 末世热',fresh:true,
+   desc:'2026 末世建造生存热门。'},
+  {id:'lunhui',name:'轮回乐园',cat:'轻小说',author:'那一只蚊子',year:'2018',status:'连载',hot:'🌟 老牌',fresh:false,
+   desc:'轻小说衍生同人，苏晓签轮回契约穿行诸界执行任务，暗黑爽文长篇。'},
+  {id:'doupo',name:'斗破苍穹',cat:'玄幻',author:'天蚕土豆',year:'2009',status:'完本',hot:'🌟 经典',fresh:false,
+   desc:'废柴少年逆袭经典玄幻开篇，国民级 IP。'},
+  {id:'fanren',name:'凡人修仙传',cat:'仙侠',author:'忘语',year:'2008',status:'完本',hot:'🌟 经典',fresh:false,
+   desc:'"凡人流"修仙开山作，写实稳健的修仙长生之路（已完本）。'},
+  {id:'xuezhong',name:'雪中悍刀行',cat:'武侠',author:'烽火戏诸侯',year:'2012',status:'完本',hot:'🌟 经典',fresh:false,
+   desc:'庙堂与江湖交织的武侠群像，文风老辣（已完本）。'},
+  {id:'zhetian',name:'遮天',cat:'玄幻',author:'辰东',year:'2009',status:'完本',hot:'🌟 经典',fresh:false,
+   desc:'九龙拉棺开篇的东方玄幻，宏大世界观与热血修行（已完本）。'},
+  {id:'quanzhi',name:'全职高手',cat:'游戏',author:'蝴蝶蓝',year:'2011',status:'完本',hot:'🌟 经典',fresh:false,
+   desc:'电竞荣耀重生，兴欣战队热血竞技（已完本）。'}
+ ],
+ study:[
+  {id:'bili',name:'哔哩哔哩',cat:'编程',sub:'video',desc:'海量免费教程：编程、考研、科普、技能全覆盖。',url:'https://www.bilibili.com',fresh:false},
+  {id:'mooc',name:'中国大学MOOC',cat:'考试',sub:'video',desc:'国内高校公开课，文凭课与通识课免费学。',url:'https://www.icourse163.org',fresh:false},
+  {id:'fcc',name:'freeCodeCamp',cat:'编程',sub:'video',desc:'免费前端/全栈开发系统课程与认证。',url:'https://www.freecodecamp.org',fresh:false},
+  {id:'b3',name:'3Blue1Brown',cat:'数学',sub:'video',desc:'用动画讲透线性代数、微积分等数学概念。',url:'https://www.3blue1brown.com',fresh:false},
+  {id:'khan',name:'可汗学院（中文）',cat:'数学',sub:'video',desc:'数学、科学、经济等系统化基础课程。',url:'https://zh.khanacademy.org',fresh:false},
+  {id:'duo',name:'多邻国 Duolingo',cat:'语言',sub:'video',desc:'游戏化外语学习，多语种日常打卡。',url:'https://www.duolingo.com',fresh:false},
+  {id:'veritasium',name:'Veritasium',cat:'科普',sub:'video',desc:'硬核科学科普频道，物理与实验演示。',url:'https://www.youtube.com/@veritasium',fresh:false},
+  {id:'wiki',name:'维基百科',cat:'百科',sub:'text',desc:'自由协作知识库，查资料首选。',url:'https://zh.wikipedia.org',fresh:false},
+  {id:'baidu_baike',name:'百度百科',cat:'百科',sub:'text',desc:'中文综合性百科，词条量巨大。',url:'https://baike.baidu.com',fresh:false},
+  {id:'weread',name:'微信读书',cat:'图书',sub:'text',desc:'海量正版图书与出版物，随时阅读。',url:'https://weread.qq.com',fresh:false},
+  {id:'gutenberg',name:'Project Gutenberg',cat:'图书',sub:'text',desc:'大量版权过期英文名著免费下载。',url:'https://www.gutenberg.org',fresh:false},
+  {id:'douban',name:'豆瓣读书',cat:'图书',sub:'text',desc:'书影音评分与书单发现。',url:'https://book.douban.com',fresh:false},
+  {id:'wenku',name:'百度文库',cat:'文档',sub:'text',desc:'论文、报告、课件等文档检索。',url:'https://wenku.baidu.com',fresh:false},
+  {id:'zhihu',name:'知乎',cat:'文档',sub:'text',desc:'问答与深度长文，各垂类经验沉淀。',url:'https://www.zhihu.com',fresh:false},
+  {id:'arxiv',name:'arXiv',cat:'文档',sub:'text',desc:'学术论文预印本库（理工科前沿）。',url:'https://arxiv.org',fresh:false}
+ ]
+};
+
+/* ============ 工具 ============ */
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function hue(id){let s=0;for(const c of id)s=(s*31+c.charCodeAt(0))>>>0;return s%360;}
+function cover(id){const h=hue(id);return `linear-gradient(150deg,hsl(${h},58%,46%),hsl(${(h+45)%360},62%,32%))`}
+function catEmoji(cat){
+  const m={开放世界:'🌍',MOBA:'⚔️',射击:'🎯',沙盒:'🧱',魂系:'💀',动作:'🗡️',二次元:'✨',武侠:'🏮',派对:'🎉',MMO:'🐉',乙女:'🌸',
+    仙侠:'🪄',玄幻:'🔥',都市:'🏙️',科幻:'🚀',武道:'🥋',轻小说:'📺',游戏:'🎮',末世:'🌑',历史:'📜',
+    编程:'💻',数学:'📐',语言:'🔤',科普:'🔬',考试:'📝',百科:'📚',图书:'📖',文档:'📄'};
+  return m[cat]||'🎮';
+}
+function fmt(d){const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* 状态徽章 */
+const ST={playing:{t:'在玩',c:'st-playing'},wish:{t:'想玩',c:'st-wish'},done:{t:'已通关',c:'st-done'},
+  drop:{t:'弃坑',c:'st-drop'},reading:{t:'追更中',c:'st-reading'},learning:{t:'学习中',c:'st-learning'},
+  finished:{t:'已学完',c:'st-finished'}};
+function stBadge(v){return v&&ST[v]?`<span class="stbadge ${ST[v].c}">${ST[v].t}</span>`:'';}
+function stars(mod,id,cur){let h='';for(let i=1;i<=5;i++)h+=`<span class="star ${i<=cur?'on':''}" data-act="rate" data-rating="${i}" data-mod="${mod}" data-id="${id}">★</span>`;return `<span class="stars">${h}</span>`;}
+
+/* 自定义封面（localStorage 存 base64，随导出备份） */
+function effImg(mod,id){return localStorage.getItem('yz_img_'+mod+'_'+id)||null;}
+function coverBlock(it,mod,opts){
+  opts=opts||{};
+  const img=effImg(mod,it.id)||it.img;
+  const e=catEmoji(it.cat);
+  return `<div class="cover" style="background:${cover(it.id)}">
+    ${img?`<img src="${esc(img)}" alt="" onerror="this.remove()">`:''}
+    ${opts.badge?`<span class="badge-top">${esc(opts.badge)}</span>`:''}
+    ${it.fresh?`<span class="fresh">最新</span>`:''}
+    <span class="emoji">${e}</span>
+    <span class="cv-name">${esc(it.name)}</span>
+  </div>`;
+}
+
+/* ============ 存储 ============ */
+const getList=mod=>mod==='diy'?load('diy'):(DATA[mod]||[]);
+const getItem=(mod,id)=>getList(mod).find(x=>x.id===id);
+function load(k){try{return JSON.parse(localStorage.getItem('yz_'+k)||'[]')}catch(e){return[]}}
+function save(k,v){localStorage.setItem('yz_'+k,JSON.stringify(v))}
+function shelf(){return load('shelf')}
+function inShelf(mod,id){return shelf().some(x=>x.mod===mod&&x.id===id)}
+function toggleShelf(mod,id){let s=shelf();const i=s.findIndex(x=>x.mod===mod&&x.id===id);
+  if(i>=0)s.splice(i,1);else{const it=getItem(mod,id);s.push({mod,id,name:it?it.name:'',cat:it?it.cat:''})}
+  save('shelf',s);refreshShelfBadge();}
+function refreshShelfBadge(){$('#shelfBadge').textContent=shelf().length;}
+function getTime(mod,id){try{return JSON.parse(localStorage.getItem('yz_time_'+mod+'_'+id)||'{}')}catch(e){return{}}}
+function setTime(mod,id,obj){localStorage.setItem('yz_time_'+mod+'_'+id,JSON.stringify(obj))}
+function stateMap(){try{return JSON.parse(localStorage.getItem('yz_state')||'{}')}catch(e){return{}}}
+function getState(mod,id){return stateMap()[mod+':'+id]||{}}
+function setState(mod,id,obj){const m=stateMap();m[mod+':'+id]=Object.assign({},m[mod+':'+id],obj);localStorage.setItem('yz_state',JSON.stringify(m));}
+
+/* ============ 主题 ============ */
+function setTheme(t){document.documentElement.dataset.theme=t;localStorage.setItem('yz_theme',t);$('#themeBtn').textContent=t==='light'?'🌙':'☀️';}
+
+/* ============ 导出 / 导入 ============ */
+function exportData(){
+  const keys=Object.keys(localStorage).filter(k=>k.startsWith('yz_'));
+  const obj={app:'my-site',exported:fmt(new Date()),items:{}};
+  keys.forEach(k=>obj.items[k]=localStorage.getItem(k));
+  const blob=new Blob([JSON.stringify(obj,null,1)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='我的小站备份-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+  toast('已导出备份文件（含评论/时长/状态/书架/封面）');
+}
+function importData(file){
+  const rd=new FileReader();
+  rd.onload=()=>{try{
+    const d=JSON.parse(rd.result);
+    if(!d.items||typeof d.items!=='object')throw 0;
+    let n=0;Object.entries(d.items).forEach(([k,v])=>{if(k.startsWith('yz_')){localStorage.setItem(k,v);n++;}});
+    toast('导入成功：'+n+' 项数据已恢复');setTimeout(()=>location.reload(),800);
+  }catch(e){toast('导入失败：文件格式不正确');}};
+  rd.readAsText(file);
+}
+
+/* ============ 路由 ============ */
+function router(){
+  const raw=location.hash.slice(1)||'/';
+  const qi=raw.indexOf('?');
+  const path=qi>=0?raw.slice(0,qi):raw;
+  const query=qi>=0?raw.slice(qi+1):'';
+  const parts=path.split('/').filter(Boolean);
+  const mod=parts[0]||'home';
+  setActiveNav(mod);
+  if(mod==='home')return renderHome();
+  if(mod==='search')return renderSearch(new URLSearchParams(query).get('q')||'');
+  if(mod==='shelf')return renderShelf();
+  if(['games','novels','study','diy'].includes(mod)){
+    if(parts[1])return renderDetail(mod,parts[1]);
+    return renderList(mod);
+  }
+  renderHome();
+}
+function setActiveNav(mod){document.querySelectorAll('#nav a').forEach(a=>{
+  const t=a.getAttribute('href').slice(2);a.classList.toggle('active',t===mod);});}
+
+/* ============ 首页仪表盘 ============ */
+function renderHome(){
+  const now=new Date();const hr=now.getHours();
+  const greet=hr<5?'夜深了，还在逛小站 🌙':hr<9?'早上好 ☀️':hr<12?'上午好 🌤️':hr<14?'中午好 🍜':hr<18?'下午好 ☕':'晚上好 🌆';
+  const dateStr=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${'日一二三四五六'[now.getDay()]}`;
+  const seed=Number(String(now.getFullYear())+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0'));
+  const pickG=DATA.games[seed%DATA.games.length];
+  const pickN=DATA.novels[(seed*7)%DATA.novels.length];
+  const pickS=DATA.study[(seed*13)%DATA.study.length];
+  const sm=stateMap();
+  const playing=DATA.games.map(g=>({g,st:sm['games:'+g.id]||{}}))
+    .filter(x=>x.st.status==='playing').map(x=>({it:x.g,h:Number(getTime('games',x.g.id).game)||0}))
+    .sort((a,b)=>b.h-a.h).slice(0,3);
+  const reading=DATA.novels.map(n=>({n,st:sm['novels:'+n.id]||{}}))
+    .filter(x=>Number(x.st.chapter)>0).sort((a,b)=>(b.st.chapter||0)-(a.st.chapter||0)).slice(0,3);
+  const rated=DATA.games.map(g=>({g,st:sm['games:'+g.id]||{}}))
+    .filter(x=>x.st.rating).sort((a,b)=>(b.st.rating||0)-(a.st.rating||0)).slice(0,5);
+  const feed=[...DATA.games.filter(g=>g.fresh).map(g=>({m:'games',it:g})),
+    ...DATA.novels.filter(n=>n.fresh).map(n=>({m:'novels',it:n}))].slice(0,6);
+  const s=shelf();
+  let gameH=0,useH=0;
+  s.forEach(x=>{const t=getTime(x.mod,x.id);gameH+=Number(t.game)||0;useH+=Number(t.use)||0;});
+  const pic=(it,mod,tag)=>`<div class="pick" data-href="#/${mod}/${it.id}">
+    <div class="pcover" style="background:${cover(it.id)}">
+      ${(effImg(mod,it.id)||it.img)?`<img src="${esc(effImg(mod,it.id)||it.img)}" alt="" onerror="this.remove()">`:''}
+      <span class="emoji">${catEmoji(it.cat)}</span>
+    </div>
+    <div style="min-width:0">
+      <div class="pt">${esc(it.name)}</div>
+      <div class="pm">${tag} · ${esc(it.cat)}</div>
+    </div></div>`;
+  app.innerHTML=`
+    <div class="greet"><h1>${greet}</h1><span class="date">${dateStr}</span></div>
+    <div class="stats">
+      <div class="stat"><b>${DATA.games.length}</b><span>🎮 游戏</span></div>
+      <div class="stat"><b>${DATA.novels.length}</b><span>📖 小说</span></div>
+      <div class="stat"><b>${DATA.study.length}</b><span>📚 学习资料</span></div>
+      <div class="stat"><b>${s.length}</b><span>📑 书架收藏</span></div>
+      <div class="stat"><b>${gameH}h</b><span>累计游戏时长</span></div>
+      <div class="stat"><b>${useH}h</b><span>累计使用时长</span></div>
+    </div>
+    <div class="sec"><h3>🎯 今日推荐<em>每天自动换一批</em></h3>
+      <div class="pickrow">${pic(pickG,'games','🎮 游戏')}${pic(pickN,'novels','📖 小说')}${pic(pickS,'study','📚 学习')}</div>
+    </div>
+    <div class="cols">
+      <div>
+        <div class="sec"><h3>🎮 最近在玩</h3>
+          ${playing.length?playing.map(x=>`<div class="rankline" data-href="#/games/${x.it.id}" data-i="0">
+            <span class="rn">${esc(x.it.name)}</span><span class="rm">${x.h}h · ${esc(x.it.cat)}</span></div>`).join('')
+            :'<div class="empty" style="padding:16px">还没有"在玩"的游戏，去详情页设置状态吧</div>'}
+        </div>
+        <div class="sec"><h3>📖 追更进度</h3>
+          ${reading.length?reading.map(x=>`<div class="rankline" data-href="#/novels/${x.n.id}" data-i="0">
+            <span class="rn">${esc(x.n.name)}</span><span class="rm">读到第 ${x.st.chapter} 章</span></div>`).join('')
+            :'<div class="empty" style="padding:16px">还没有追更记录，去小说详情页填写"读到第几章"吧</div>'}
+        </div>
+      </div>
+      <div>
+        <div class="sec"><h3>⭐ 我的高分推荐</h3>
+          ${rated.length?rated.map((x,i)=>`<div class="rankline" data-href="#/games/${x.g.id}" data-i="${i}">
+            <span class="ri">${i+1}</span><span class="rn">${esc(x.g.name)}</span><span class="rm">${'★'.repeat(x.st.rating)}</span></div>`).join('')
+            :'<div class="empty" style="padding:16px">给游戏评分后，这里会出现高分推荐</div>'}
+        </div>
+        <div class="sec"><h3>🆕 最新上新</h3>
+          <div class="feedline">${feed.map(x=>`<a href="#/${x.m}/${x.it.id}">${esc(x.it.name)}</a>`).join('')}</div>
+        </div>
+      </div>
+    </div>
+    <div class="sec"><h3>📂 内容模块</h3>
+      <div class="mods">
+        ${Object.entries(MODS).map(([k,v])=>`<div class="modcard" data-href="#/${k}">
+          <div class="ico">${v.icon}</div><h3>${v.name}</h3>
+          <p>${k==='games'?DATA.games.length+' 款作品':k==='novels'?DATA.novels.length+' 部作品':k==='study'?DATA.study.length+' 个资源':'自定义模块，自己加内容'}</p></div>`).join('')}
+      </div>
+    </div>`;
+  app.querySelectorAll('[data-href]').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
+}
+
+/* ============ 列表：游戏（IGN/游民风格） ============ */
+function renderGamesList(){
+  const list=DATA.games;
+  const cats=['全部','最新上新',...Array.from(new Set(list.map(x=>x.cat)))];
+  const cur=new URLSearchParams(location.hash.split('?')[1]||'').get('cat')||'全部';
+  const filtered=cur==='全部'?list:(cur==='最新上新'?list.filter(x=>x.fresh):list.filter(x=>x.cat===cur));
+  const feat=list.find(x=>x.fresh)||list[0];
+  app.innerHTML=`
+    <div class="crumbs"><a href="#/">首页</a> / 游戏</div>
+    <h1 class="page">游戏（${list.length}）</h1>
+    <p class="page-sub">参考游戏资讯站排版 · 点封面进详情 · 详情页可设状态/评分/时长/上传封面</p>
+    <div class="hero">
+      ${feat.img?`<img src="${esc(feat.img)}" alt="" onerror="this.remove()">`:''}
+      <div class="hgrad"></div>
+      <div class="hcontent">
+        <h2 class="ht">${esc(feat.name)}</h2>
+        <div class="hm">${esc(feat.dev||'')} · ${esc(feat.cat)} · ${esc(feat.year)}</div>
+        <div class="htags"><span>${esc(feat.platform)}</span>${feat.fresh?'<span>🆕 新作</span>':''}</div>
+        <div class="row-btns">
+          <a class="btn" href="#/games/${feat.id}">查看详情</a>
+          <a class="btn ghost" href="${esc(feat.url||'#')}" target="_blank" rel="noopener">前往官网</a>
+        </div>
+      </div>
+    </div>
+    <div class="chips">${cats.map(c=>`<span class="chip ${c===cur?'on':''}" data-cat="${esc(c)}">${esc(c)}</span>`).join('')}</div>
+    <div class="grid">
+      ${filtered.map((it,i)=>{const st=getState('games',it.id).status;
+        return `<div class="card" data-href="#/games/${it.id}" style="animation-delay:${Math.min(i*40,320)}ms">
+          ${coverBlock(it,'games',{badge:it.platform})}
+          <div class="meta"><div class="nm">${esc(it.name)}</div><div class="ct">${esc(it.cat)} · ${esc(it.dev||'')}</div>
+          ${st?`<div class="stline">${stBadge(st)}</div>`:''}</div>
+        </div>`;}).join('')}
+    </div>`;
+  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>location.hash=`#/games?cat=${encodeURIComponent(c.dataset.cat)}`);
+  app.querySelectorAll('.card').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
+}
+
+/* ============ 列表：小说（起点风格排行榜） ============ */
+function renderNovelsList(){
+  const list=DATA.novels;
+  const cats=['全部','最新上新',...Array.from(new Set(list.map(x=>x.cat)))];
+  const cur=new URLSearchParams(location.hash.split('?')[1]||'').get('cat')||'全部';
+  const filtered=cur==='全部'?list:(cur==='最新上新'?list.filter(x=>x.fresh):list.filter(x=>x.cat===cur));
+  app.innerHTML=`
+    <div class="crumbs"><a href="#/">首页</a> / 小说</div>
+    <h1 class="page">小说热榜（${list.length}）</h1>
+    <p class="page-sub">参考起点中文网榜单排版 · 点条目进详情 · 详情页可记追更进度/评分</p>
+    <div class="chips">${cats.map(c=>`<span class="chip ${c===cur?'on':''}" data-cat="${esc(c)}">${esc(c)}</span>`).join('')}</div>
+    <div class="ranklist">
+      ${filtered.map((it,i)=>{const st=getState('novels',it.id);
+        return `<div class="rankrow" data-href="#/novels/${it.id}" style="animation-delay:${Math.min(i*35,320)}ms">
+          <span class="rk">${i+1}</span>
+          <div class="bcover" style="background:${cover(it.id)}">
+            ${(effImg('novels',it.id)||it.img)?`<img src="${esc(effImg('novels',it.id)||it.img)}" alt="" onerror="this.remove()">`:''}
+            ${it.fresh?'<span class="fresh">新</span>':''}
+            <span class="emoji">📖</span>
+            <span class="cv-name">${esc(it.name)}</span>
+          </div>
+          <div class="binfo">
+            <div class="bt">${esc(it.name)} ${stBadge(st.status)}</div>
+            <div class="bm">${esc(it.author)} · ${esc(it.cat)} · ${esc(it.status)}${st.chapter?` · 读到第 ${st.chapter} 章`:''}</div>
+            <div class="bd">${esc(it.desc)}</div>
+            <div class="btags">
+              <span class="htag">${esc(it.hot||'')}</span>
+              <span class="statag">${esc(it.year)}</span>
+              ${it.fresh?'<span class="statag" style="color:#ff9a3d;border-color:#ff9a3d">最新上新</span>':''}
+            </div>
+          </div>
+        </div>`;}).join('')}
+    </div>`;
+  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>location.hash=`#/novels?cat=${encodeURIComponent(c.dataset.cat)}`);
+  app.querySelectorAll('.rankrow').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
+}
+
+/* ============ 列表：学习资料 / DIY（卡片网格） ============ */
+function renderStudyList(){
+  const list=DATA.study;
+  const cats=['全部',...Array.from(new Set(list.map(x=>x.cat)))];
+  const cur=new URLSearchParams(location.hash.split('?')[1]||'').get('cat')||'全部';
+  const filtered=cur==='全部'?list:list.filter(x=>x.cat===cur);
+  app.innerHTML=`
+    <div class="crumbs"><a href="#/">首页</a> / 学习资料</div>
+    <h1 class="page">学习资料（${list.length}）</h1>
+    <p class="page-sub">视频 + 文本 · 点卡片进详情 · 可记学习进度</p>
+    <div class="chips">${cats.map(c=>`<span class="chip ${c===cur?'on':''}" data-cat="${esc(c)}">${esc(c)}</span>`).join('')}</div>
+    <div class="grid">
+      ${filtered.map((it,i)=>{const st=getState('study',it.id).status;
+        return `<div class="card" data-href="#/study/${it.id}" style="animation-delay:${Math.min(i*40,320)}ms">
+          ${coverBlock(it,'study',{badge:it.sub==='video'?'视频':'文本'})}
+          <div class="meta"><div class="nm">${esc(it.name)}</div><div class="ct">${esc(it.cat)}</div>
+          ${st?`<div class="stline">${stBadge(st)}</div>`:''}</div>
+        </div>`;}).join('')}
+    </div>`;
+  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>location.hash=`#/study?cat=${encodeURIComponent(c.dataset.cat)}`);
+  app.querySelectorAll('.card').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
+}
+function renderDIY(){
+  const list=load('diy');
+  app.innerHTML=`
+    <div class="crumbs"><a href="#/">首页</a> / DIY</div>
+    <h1 class="page">🧩 DIY 专区</h1>
+    <p class="page-sub">预留给你的自定义模块，自己加内容（标题/分类/简介/链接）</p>
+    <form class="block" id="diyForm">
+      <h3>添加 DIY 内容</h3>
+      <input class="f-title" placeholder="标题" required style="margin-bottom:10px">
+      <input class="f-cat" placeholder="分类（如：工具/收藏/笔记）" style="margin-bottom:10px">
+      <input class="f-url" placeholder="链接（可选）" style="margin-bottom:10px">
+      <textarea class="f-desc" placeholder="简介（可选）" rows="2"></textarea>
+      <div class="row-btns"><button type="submit" class="btn">添加</button></div>
+    </form>
+    <div class="grid" id="diyGrid" style="margin-top:22px">
+      ${list.map((it,i)=>`<div class="card" data-href="#/diy/${it.id}" style="animation-delay:${Math.min(i*40,320)}ms">
+        ${coverBlock(it,'diy',{badge:it.cat||'未分类'})}
+        <div class="meta"><div class="nm">${esc(it.name)}</div><div class="ct">${esc(it.cat||'未分类')}</div></div>
+      </div>`).join('')}
+    </div>`;
+  $('#diyForm').addEventListener('submit',e=>{
+    e.preventDefault();const f=e.target;
+    const title=f.querySelector('.f-title').value.trim();if(!title)return;
+    const arr=load('diy');arr.push({id:'d'+Date.now(),name:title,cat:f.querySelector('.f-cat').value.trim(),
+      url:f.querySelector('.f-url').value.trim(),desc:f.querySelector('.f-desc').value.trim(),img:null,fresh:false});
+    save('diy',arr);location.hash='#/diy';renderDIY();
+  });
+  app.querySelectorAll('.card').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
+}
+function renderList(mod){
+  if(mod==='novels')return renderNovelsList();
+  if(mod==='study')return renderStudyList();
+  if(mod==='diy')return renderDIY();
+  return renderGamesList();
+}
+
+/* ============ 搜索 ============ */
+function renderSearch(q){
+  $('#searchInput').value=q;
+  q=q.trim().toLowerCase();
+  if(!q){app.innerHTML=`<h1 class="page">搜索</h1><p class="page-sub">在顶部搜索框输入关键词，全站即时查找游戏 / 小说 / 学习资料 / DIY 内容</p>`;return;}
+  const hit=(arr,mod)=>arr.filter(it=>(it.name+it.cat+(it.desc||'')+(it.author||'')+(it.dev||'')+(it.platform||'')).toLowerCase().includes(q)).slice(0,20);
+  const g=hit(DATA.games,'games'),n=hit(DATA.novels,'novels'),s=hit(DATA.study,'study'),d=hit(load('diy'),'diy');
+  const total=g.length+n.length+s.length+d.length;
+  const row=(it,mod,tag)=>`<div class="srow" data-href="#/${mod}/${it.id}" style="animation-delay:${Math.min(parseInt(Math.random()*300),300)}ms">
+    <div class="scover" style="background:${cover(it.id)}">
+      ${(effImg(mod,it.id)||it.img)?`<img src="${esc(effImg(mod,it.id)||it.img)}" alt="" onerror="this.remove()">`:''}
+      <span class="emoji">${catEmoji(it.cat)}</span>
+    </div>
+    <span class="sname">${esc(it.name)}</span>
+    <span class="smeta">${tag} · ${esc(it.cat)}</span></div>`;
+  app.innerHTML=`
+    <div class="crumbs"><a href="#/">首页</a> / 搜索</div>
+    <h1 class="page">🔍 "${esc(q)}" 的搜索结果（${total}）</h1>
+    ${g.length?`<div class="searchgrp"><h3>🎮 游戏（${g.length}）</h3>${g.map(x=>row(x,'games','🎮')).join('')}</div>`:''}
+    ${n.length?`<div class="searchgrp"><h3>📖 小说（${n.length}）</h3>${n.map(x=>row(x,'novels','📖')).join('')}</div>`:''}
+    ${s.length?`<div class="searchgrp"><h3>📚 学习资料（${s.length}）</h3>${s.map(x=>row(x,'study','📚')).join('')}</div>`:''}
+    ${d.length?`<div class="searchgrp"><h3>🧩 DIY（${d.length}）</h3>${d.map(x=>row(x,'diy','🧩')).join('')}</div>`:''}
+    ${total?`<div class="empty" style="margin-top:18px">没找到想要的？去 DIY 专区自己添加 ➕</div>`:''}`;
+  app.querySelectorAll('[data-href]').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
+}
+
+/* ============ 详情分发 ============ */
+function renderDetail(mod,id){
+  const it=getItem(mod,id);
+  if(!it){app.innerHTML=`<div class="empty">未找到该项目。<a href="#/${mod}">返回</a></div>`;return;}
+  if(mod==='novels')return renderNovelsDetail(it);
+  if(mod==='study')return renderStudyDetail(it);
+  return renderGamesDetail(it);
+}
+
+/* 游戏详情 */
+function renderGamesDetail(it){
+  const t=getTime('games',it.id);
+  const st=getState('games',it.id);
+  const onShelf=inShelf('games',it.id);
+  const hasCustom=!!effImg('games',it.id);
+  const related=DATA.games.filter(x=>x.cat===it.cat&&x.id!==it.id).slice(0,6);
+  app.innerHTML=`
+    <div class="crumbs"><a href="#/">首页</a> / <a href="#/games">游戏</a> / ${esc(it.name)}</div>
+    <div class="detail">
+      <div class="dcover" style="background:${cover(it.id)}">
+        ${(effImg('games',it.id)||it.img)?`<img src="${esc(effImg('games',it.id)||it.img)}" alt="" onerror="this.remove()">`:''}
+        <span class="emoji">${catEmoji(it.cat)}</span>
+        <span class="cv-name">${esc(it.name)}</span>
+      </div>
+      <div>
+        <h1>${esc(it.name)} ${stBadge(st.status)}</h1>
+        <div class="tags">
+          <span class="tag">${esc(it.cat)}</span>
+          <span class="tag">${esc(it.platform)}</span>
+          <span class="tag">${esc(it.year)}</span>
+          ${it.dev?`<span class="tag">${esc(it.dev)}</span>`:''}
+          ${it.fresh?'<span class="tag" style="color:#ff9a3d;border-color:#ff9a3d">新作</span>':''}
+        </div>
+        <div class="desc">${esc(it.desc)}</div>
+        <div class="row-btns">
+          <a class="btn" href="${esc(it.url||'#')}" target="_blank" rel="noopener">前往官网</a>
+          <button class="btn ghost" data-act="shelf" data-mod="games" data-id="${it.id}">${onShelf?'✓ 已在书架':'＋ 加入书架'}</button>
+          <button class="btn ghost" data-act="upcover" data-mod="games" data-id="${it.id}">🖼️ 上传封面</button>
+          ${hasCustom?`<button class="btn ghost" data-act="rmcover" data-mod="games" data-id="${it.id}">🗑️ 移除封面</button>`:''}
+        </div>
+        <div class="block"><h3>我的状态</h3>
+          <div class="state-row">
+            <span>状态：</span>
+            <select class="stsel" data-act="status" data-mod="games" data-id="${it.id}">
+              <option value="" ${!st.status?'selected':''}>— 无状态 —</option>
+              <option value="playing" ${st.status==='playing'?'selected':''}>🎮 在玩</option>
+              <option value="wish" ${st.status==='wish'?'selected':''}>⭐ 想玩</option>
+              <option value="done" ${st.status==='done'?'selected':''}>🏆 已通关</option>
+              <option value="drop" ${st.status==='drop'?'selected':''}>💤 弃坑</option>
+            </select>
+            <span>评分：</span>${stars('games',it.id,st.rating||0)}
+          </div></div>
+        <div class="block"><h3>我的评论</h3>
+          <textarea data-cid="games:${it.id}" placeholder="写下你的看法、评分、进度…">${esc(localStorage.getItem('yz_comment_games:'+it.id)||'')}</textarea></div>
+        <div class="block"><h3>时长统计（小时，可自定义）</h3>
+          <div class="time-row">
+            <label>🎮 游戏时长<input type="number" min="0" step="0.5" data-tid="games:${it.id}" data-field="game" value="${t.game||0}">小时</label>
+            <label>⏱️ 使用时长<input type="number" min="0" step="0.5" data-tid="games:${it.id}" data-field="use" value="${t.use||0}">小时</label>
+          </div></div>
+        ${related.length?`<div class="block"><h3>同类型推荐（${esc(it.cat)}）</h3>
+          <div class="rel">${related.map(r=>`<span class="mini" data-href="#/games/${r.id}">${esc(r.name)}</span>`).join('')}</div></div>`:''}
+      </div>
+    </div>`;
+  app.querySelectorAll('[data-href]').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
+}
+
+/* 小说详情 */
+function renderNovelsDetail(it){
+  const t=getTime('novels',it.id);
+  const st=getState('novels',it.id);
+  const onShelf=inShelf('novels',it.id);
+  const hasCustom=!!effImg('novels',it.id);
+  const related=DATA.novels.filter(x=>x.cat===it.cat&&x.id!==it.id).slice(0,6);
+  app.innerHTML=`
+    <div class="crumbs"><a href="#/">首页</a> / <a href="#/novels">小说</a> / ${esc(it.name)}</div>
+    <div class="detail">
+      <div class="dcover" style="background:${cover(it.id)}">
+        ${(effImg('novels',it.id)||it.img)?`<img src="${esc(effImg('novels',it.id)||it.img)}" alt="" onerror="this.remove()">`:''}
+        <span class="emoji">📖</span>
+        <span class="cv-name">${esc(it.name)}</span>
+      </div>
+      <div>
+        <h1>${esc(it.name)} ${stBadge(st.status)}</h1>
+        <div class="tags">
+          <span class="tag">${esc(it.cat)}</span>
+          <span class="tag">${esc(it.author)}</span>
+          <span class="tag">${esc(it.status)}</span>
+          <span class="tag">${esc(it.year)}</span>
+          ${it.fresh?'<span class="tag" style="color:#ff9a3d;border-color:#ff9a3d">最新上新</span>':''}
+        </div>
+        <div class="desc">${esc(it.desc)}</div>
+        <div class="row-btns">
+          <a class="btn" href="https://www.qidian.com/search?kw=${encodeURIComponent(it.name)}" target="_blank" rel="noopener">前往阅读（起点）</a>
+          <button class="btn ghost" data-act="shelf" data-mod="novels" data-id="${it.id}">${onShelf?'✓ 已在书架':'＋ 加入书架'}</button>
+          <button class="btn ghost" data-act="upcover" data-mod="novels" data-id="${it.id}">🖼️ 上传封面</button>
+          ${hasCustom?`<button class="btn ghost" data-act="rmcover" data-mod="novels" data-id="${it.id}">🗑️ 移除封面</button>`:''}
+        </div>
+        <div class="block"><h3>我的状态</h3>
+          <div class="state-row">
+            <span>状态：</span>
+            <select class="stsel" data-act="status" data-mod="novels" data-id="${it.id}">
+              <option value="" ${!st.status?'selected':''}>— 无状态 —</option>
+              <option value="reading" ${st.status==='reading'?'selected':''}>📖 追更中</option>
+              <option value="done" ${st.status==='done'?'selected':''}>✅ 已读完</option>
+              <option value="drop" ${st.status==='drop'?'selected':''}>💤 弃书</option>
+            </select>
+            <span>读到第</span>
+            <input type="number" min="0" step="1" data-act="chapter" data-mod="novels" data-id="${it.id}" value="${st.chapter||''}" style="width:90px" placeholder="章">
+            <span>章</span>
+            <span>评分：</span>${stars('novels',it.id,st.rating||0)}
+          </div></div>
+        <div class="block"><h3>我的书评</h3>
+          <textarea data-cid="novels:${it.id}" placeholder="写下你的书评、进度、追更感受…">${esc(localStorage.getItem('yz_comment_novels:'+it.id)||'')}</textarea></div>
+        <div class="block"><h3>阅读时长（小时，可自定义）</h3>
+          <div class="time-row"><label>⏱️ 阅读时长<input type="number" min="0" step="0.5" data-tid="novels:${it.id}" data-field="use" value="${t.use||0}">小时</label></div></div>
+        ${related.length?`<div class="block"><h3>同分类推荐（${esc(it.cat)}）</h3>
+          <div class="rel">${related.map(r=>`<span class="mini" data-href="#/novels/${r.id}">${esc(r.name)}</span>`).join('')}</div></div>`:''}
+      </div>
+    </div>`;
+  app.querySelectorAll('[data-href]').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
+}
+
+/* 学习详情 */
+function renderStudyDetail(it){
+  const t=getTime('study',it.id);
+  const st=getState('study',it.id);
+  const onShelf=inShelf('study',it.id);
+  const hasCustom=!!effImg('study',it.id);
+  app.innerHTML=`
+    <div class="crumbs"><a href="#/">首页</a> / <a href="#/study">学习资料</a> / ${esc(it.name)}</div>
+    <div class="detail">
+      <div class="dcover" style="background:${cover(it.id)}">
+        ${(effImg('study',it.id)||it.img)?`<img src="${esc(effImg('study',it.id)||it.img)}" alt="" onerror="this.remove()">`:''}
+        <span class="emoji">${catEmoji(it.cat)}</span>
+        <span class="cv-name">${esc(it.name)}</span>
+      </div>
+      <div>
+        <h1>${esc(it.name)} ${stBadge(st.status)}</h1>
+        <div class="tags"><span class="tag">${esc(it.cat)}</span><span class="tag">${it.sub==='video'?'视频':'文本'}</span></div>
+        <div class="desc">${esc(it.desc)}</div>
+        <div class="row-btns">
+          <a class="btn" href="${esc(it.url)}" target="_blank" rel="noopener">前往查看</a>
+          <button class="btn ghost" data-act="shelf" data-mod="study" data-id="${it.id}">${onShelf?'✓ 已在书架':'＋ 加入书架'}</button>
+          <button class="btn ghost" data-act="upcover" data-mod="study" data-id="${it.id}">🖼️ 上传封面</button>
+          ${hasCustom?`<button class="btn ghost" data-act="rmcover" data-mod="study" data-id="${it.id}">🗑️ 移除封面</button>`:''}
+        </div>
+        <div class="block"><h3>我的状态</h3>
+          <div class="state-row">
+            <span>进度：</span>
+            <select class="stsel" data-act="status" data-mod="study" data-id="${it.id}">
+              <option value="" ${!st.status?'selected':''}>未开始</option>
+              <option value="learning" ${st.status==='learning'?'selected':''}>📚 学习中</option>
+              <option value="finished" ${st.status==='finished'?'selected':''}>✅ 已学完</option>
+            </select>
+          </div></div>
+        <div class="block"><h3>我的笔记</h3>
+          <textarea data-cid="study:${it.id}" placeholder="记录学习重点、进度…">${esc(localStorage.getItem('yz_comment_study:'+it.id)||'')}</textarea></div>
+        <div class="block"><h3>学习时长（小时，可自定义）</h3>
+          <div class="time-row"><label>⏱️ 学习时长<input type="number" min="0" step="0.5" data-tid="study:${it.id}" data-field="use" value="${t.use||0}">小时</label></div></div>
+      </div>
+    </div>`;
+  app.querySelectorAll('[data-href]').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
+}
+
+/* ============ 我的书架 ============ */
+function renderShelf(){
+  const s=shelf();
+  let gameH=0,useH=0;
+  s.forEach(x=>{const t=getTime(x.mod,x.id);gameH+=Number(t.game)||0;useH+=Number(t.use)||0;});
+  if(!s.length){app.innerHTML=`<div class="crumbs"><a href="#/">首页</a> / 我的书架</div>
+    <h1 class="page">我的书架</h1><div class="empty">书架还是空的，去各模块点「加入书架」吧。</div>`;return;}
+  app.innerHTML=`
+    <div class="crumbs"><a href="#/">首页</a> / 我的书架</div>
+    <h1 class="page">我的书架（${s.length}）</h1>
+    <p class="page-sub">累计游戏时长 ${gameH}h · 累计使用时长 ${useH}h</p>
+    <div class="grid">
+      ${s.map((x,i)=>{const it=getItem(x.mod,x.id);if(!it)return'';
+        const st=getState(x.mod,x.id).status;
+        return `<div class="card" data-href="#/${x.mod}/${x.id}" style="animation-delay:${Math.min(i*40,320)}ms">
+          ${coverBlock(it,x.mod,{badge:MODS[x.mod].name})}
+          <div class="meta"><div class="nm">${esc(x.name)}</div><div class="ct">${esc(MODS[x.mod].name)}</div>
+          ${st?`<div class="stline">${stBadge(st)}</div>`:''}</div>
+        </div>`;}).join('')}
+    </div>`;
+  app.querySelectorAll('.card').forEach(c=>c.onclick=()=>location.hash=c.dataset.href);
+}
+
+/* ============ 事件委托 ============ */
+app.addEventListener('click',e=>{
+  const a=e.target.closest('[data-act]');if(!a)return;
+  const act=a.dataset.act;
+  if(act==='update'){doUpdate();}
+  if(act==='shelf'){toggleShelf(a.dataset.mod,a.dataset.id);renderDetail(a.dataset.mod,a.dataset.id);toast('已更新书架');}
+  if(act==='rate'){setState(a.dataset.mod,a.dataset.id,{rating:Number(a.dataset.rating)});toast('评分已保存 ⭐'+a.dataset.rating);renderDetail(a.dataset.mod,a.dataset.id);}
+  if(act==='upcover'){coverTarget={mod:a.dataset.mod,id:a.dataset.id};$('#coverFile').click();}
+  if(act==='rmcover'){localStorage.removeItem('yz_img_'+a.dataset.mod+'_'+a.dataset.id);toast('已移除自定义封面');renderDetail(a.dataset.mod,a.dataset.id);}
+  if(act==='export'){exportData();}
+  if(act==='import'){$('#importFile').click();}
+  if(act==='deldel'){const arr=load('diy').filter(x=>x.id!==a.dataset.id);save('diy',arr);location.hash='#/diy';renderDIY();}
+});
+app.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.cid){localStorage.setItem('yz_comment_'+t.dataset.cid,t.value);}
+  if(t.dataset.tid){const [m,id]=t.dataset.tid.split(':');const obj=getTime(m,id);obj[t.dataset.field]=Number(t.value)||0;setTime(m,id,obj);}
+  if(t.dataset.act==='status'){setState(t.dataset.mod,t.dataset.id,{status:t.value});toast('状态已保存');router();}
+  if(t.dataset.act==='chapter'){setState(t.dataset.mod,t.dataset.id,{chapter:Number(t.value)||''});toast('追更进度已保存');router();}
+});
+app.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.cid){localStorage.setItem('yz_comment_'+t.dataset.cid,t.value);}
+  if(t.dataset.tid){const [m,id]=t.dataset.tid.split(':');const obj=getTime(m,id);obj[t.dataset.field]=Number(t.value)||0;setTime(m,id,obj);}
+});
+let coverTarget=null;
+$('#coverFile').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f||!coverTarget)return;
+  const rd=new FileReader();
+  rd.onload=()=>{localStorage.setItem('yz_img_'+coverTarget.mod+'_'+coverTarget.id,rd.result);
+    const t=coverTarget;coverTarget=null;toast('封面已更新 🖼️');renderDetail(t.mod,t.id);};
+  rd.readAsDataURL(f);e.target.value='';
+});
+$('#importFile').addEventListener('change',e=>{const f=e.target.files[0];if(f)importData(f);e.target.value='';});
+
+/* 顶栏：搜索 / 主题 / 更新 */
+let searchTimer;
+$('#searchInput').addEventListener('input',e=>{
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(()=>{const v=e.target.value.trim();
+    if(v)location.hash='#/search?q='+encodeURIComponent(v);
+    else if(location.hash.startsWith('#/search'))location.hash='#/';},300);
+});
+$('#themeBtn').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='light'?'dark':'light'));
+
+/* ============ 每日更新（部署后从 latest.json 同步上新） ============ */
+async function fetchLatest(){
+  try{
+    const r=await fetch('latest.json?t='+Date.now());
+    if(!r.ok)throw 0;
+    const d=await r.json();
+    ['games','novels','study'].forEach(k=>{(d[k]||[]).forEach(n=>{
+      const i=DATA[k].findIndex(x=>x.id===n.id);
+      if(i>=0)Object.assign(DATA[k][i],n);else DATA[k].push(n);
+    });});
+    return d.updated||'';
+  }catch(e){return null;}
+}
+async function doUpdate(){
+  const upd=await fetchLatest();
+  localStorage.setItem('yz_lastupdate',Date.now());
+  $('#lastupdate').textContent='最后更新：'+fmt(new Date())+(upd?('（已同步 '+upd+' 上新）'):'（本地预览）');
+  toast(upd?('已同步最新内容：'+upd):'已刷新（部署后将从 latest.json 每日同步上新）');
+  const h=location.hash;
+  if(h.startsWith('#/diy')&&!h.split('/')[2])return renderDIY();
+  router();
+}
+let autoTimer=null;
+function startAuto(min){if(autoTimer)clearInterval(autoTimer);autoTimer=null;if(min>0)autoTimer=setInterval(doUpdate,min*60000);}
+$('#automin').addEventListener('change',e=>{localStorage.setItem('yz_automin',e.target.value);startAuto(Number(e.target.value));});
+$('#automin').value=localStorage.getItem('yz_automin')||'30';
+startAuto(Number($('#automin').value));
+$('.updbtn').addEventListener('click',doUpdate);
+
+/* ============ 初始化 ============ */
+window.addEventListener('hashchange',()=>{
+  if(location.hash.startsWith('#/diy')&&!location.hash.split('/')[2])return renderDIY();
+  router();
+});
+window.addEventListener('load',()=>{
+  if(localStorage.getItem('yz_theme')==='light')setTheme('light');else setTheme('dark');
+  $('#year').textContent=' · '+new Date().getFullYear();
+  $('#year2').textContent=new Date().getFullYear();
+  const lu=localStorage.getItem('yz_lastupdate');
+  $('#lastupdate').textContent='最后更新：'+(lu?fmt(new Date(Number(lu))):'尚未更新');
+  refreshShelfBadge();
+  const h=location.hash;
+  if(h.startsWith('#/diy')&&!h.split('/')[2])return renderDIY();
+  router();
+  const last=Number(localStorage.getItem('yz_lastsync')||0);
+  if(Date.now()-last>24*3600*1000){doUpdate();}
+  localStorage.setItem('yz_lastsync',Date.now());
+});
+</script>
+</body>
+</html>
