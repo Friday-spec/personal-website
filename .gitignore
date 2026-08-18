@@ -4,3 +4,6 @@ _check.js
 _dom_home.html
 _shot_*.png
 _edge_tmp*
+
+start-site.bat
+start-site.ps1
